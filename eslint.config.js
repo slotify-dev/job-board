@@ -79,6 +79,8 @@ export default [
       globals: {
         node: true,
         browser: false,
+        console: 'readonly',
+        process: 'readonly',
       },
     },
     rules: {
