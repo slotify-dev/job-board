@@ -1,23 +1,25 @@
 FROM oven/bun:alpine
-
-# Set working directory
 WORKDIR /app
 
-# Copy package.json and install dependencies
-COPY package.json ./
-RUN bun install
+# Copy package files (optimized for caching)
+COPY package.json bun.lockb* ./
+COPY apps/frontend/package.json ./apps/frontend/
 
-# Copy all source files
-COPY . .
+# Install dependencies
+RUN bun install --frozen-lockfile
 
-# Create non-root user and set permissions
+# Copy frontend app files only
+COPY apps/frontend ./apps/frontend
+
+# Create non-root user
 RUN addgroup -g 1001 bunjs && \
     adduser -u 1001 -G bunjs -D bunuser && \
     chown -R bunuser:bunjs /app
 
-# Switch to non-root user
+# Set working directory to frontend app
 USER bunuser
+WORKDIR /app/apps/frontend
 
-# Expose port and start dev server
+# expose port
 EXPOSE 5173
 CMD ["bun", "run", "dev", "--host", "0.0.0.0"]
