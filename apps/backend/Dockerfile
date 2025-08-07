@@ -16,15 +16,14 @@ RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 bunuser && \
     chown -R bunuser:nodejs /app
 
-USER bunuser
-
 # Expose port (configurable via ENV)
 ARG PORT=3000
 EXPOSE ${PORT}
 ENV PORT=${PORT}
 
 # Set working directory to backend app
+USER bunuser
 WORKDIR /app/apps/backend
 
 # Default command for development with hot reload
-CMD ["bun", "--watch", "src/index.ts"]
+CMD ["bun", "--watch", "src/server.ts"]

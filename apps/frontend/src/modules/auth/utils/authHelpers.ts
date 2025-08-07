@@ -34,9 +34,7 @@ export const registerSchema = z
       .string()
       .min(1, 'Last name is required')
       .min(2, 'Last name must be at least 2 characters'),
-    role: z.enum(['job_seeker', 'employer'], {
-      required_error: 'Please select a role',
-    }),
+    role: z.enum(['job_seeker', 'employer']),
   })
   .refine((data) => data.password === data.confirmPassword, {
     // eslint-disable-next-line quotes
@@ -45,9 +43,7 @@ export const registerSchema = z
   });
 
 export const roleSelectionSchema = z.object({
-  role: z.enum(['job_seeker', 'employer'], {
-    required_error: 'Please select a role',
-  }),
+  role: z.enum(['job_seeker', 'employer']),
 });
 
 export const getUserDisplayName = (user: {

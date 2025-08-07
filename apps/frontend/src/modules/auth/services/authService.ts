@@ -7,13 +7,12 @@ import type {
 } from '../types/auth.types';
 
 import { formatAuthError } from '../utils/authHelpers';
-import type { Response, HeadersInit } from 'node-fetch';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
 
 class AuthService {
-  private getAuthHeaders(): HeadersInit {
+  private getAuthHeaders(): Record<string, string> {
     const token = localStorage.getItem('accessToken');
     return {
       'Content-Type': 'application/json',
@@ -21,7 +20,7 @@ class AuthService {
     };
   }
 
-  private async handleResponse<T>(response: Response): Promise<T> {
+  private async handleResponse<T>(response: globalThis.Response): Promise<T> {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(
