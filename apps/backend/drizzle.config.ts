@@ -14,16 +14,16 @@ if (
 }
 
 export default defineConfig({
-  schema: './src/database/models/*.ts',
-  out: './src/database/migrations',
-  dialect: 'postgresql',
-  dbCredentials: {
-    host: process.env.PG_HOST,
-    port: parseInt(process.env.PG_PORT),
-    user: process.env.PG_USER,
-    password: process.env.PG_PASSWORD,
-    database: process.env.PG_DB,
-  },
-  verbose: true,
   strict: true,
+  verbose: true,
+  dialect: 'postgresql',
+  out: './src/database/migrations',
+  schema: './src/database/models/*.ts',
+  dbCredentials: {
+    user: process.env.PG_USER,
+    host: process.env.PG_HOST,
+    database: process.env.PG_DB,
+    password: process.env.PG_PASSWORD,
+    port: parseInt(process.env.PG_PORT),
+  },
 });
