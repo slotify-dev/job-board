@@ -25,14 +25,18 @@ services:
     build:
       context: .
       dockerfile: ./apps/backend/Dockerfile
-    user: "1001:1001"
     restart: unless-stopped
     env_file: apps/backend/.env
+    user: "${UID:-1000}:${GID:-1000}"
     container_name: job-board-backend
+    environment:
+      - NODE_ENV=development
+      - BUN_INSTALL_CACHE=/app/.bun-cache    
     ports:
       - '${PORT:-3000}:${PORT:-3000}'
     volumes:
-      - ./apps/backend:/app/apps/backend
+      - ./apps/backend/src:/app/apps/backend/src:rw
+      - ./apps/backend/drizzle.config.ts:/app/apps/backend/drizzle.config.ts:ro
       - backend_node_modules:/app/node_modules
     depends_on:
       postgres:
@@ -42,9 +46,9 @@ services:
     build:
       context: .
       dockerfile: apps/frontend/Dockerfile
-    user: "1001:1001"
     restart: unless-stopped
     env_file: apps/frontend/.env
+    user: "${UID:-1000}:${GID:-1000}"
     container_name: job-board-frontend
     ports:
       - '${PORT:-5173}:${PORT:-5173}'
@@ -53,8 +57,8 @@ services:
       - frontend_node_modules:/app/node_modules
     environment:
       - NODE_ENV=development
-      - BUN_INSTALL_CACHE=/app/.bun-cache
       - CHOKIDAR_USEPOLLING=true
+      - BUN_INSTALL_CACHE=/app/.bun-cache
     depends_on:
       - backend
 
