@@ -23,4 +23,8 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
   },
+  cacheDir: '/tmp/vite-cache',
+  optimizeDeps: {
+    force: false,
+  },
 });
