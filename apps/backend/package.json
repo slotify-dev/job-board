@@ -4,27 +4,34 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun --watch src/server.ts",
-    "start": "bun src/server.ts",
-    "build": "bun build src/server.ts --outdir ./dist --target bun",
     "typecheck": "tsc --noEmit",
+    "start": "bun src/server.ts",
+    "migrate:up": "drizzle-kit up",
+    "migrate:down": "drizzle-kit down",
+    "dev": "bun --watch src/server.ts",
+    "format": "npx prettier --write src",
     "lint": "npx eslint src --ext .ts --fix",
-    "format": "npx prettier --write src"
+    "migrate:generate": "drizzle-kit generate:pg",
+    "build": "bun build src/server.ts --outdir ./dist --target bun"
   },
   "dependencies": {
-    "express": "^4.21.2",
-    "zod": "^3.25.76",
-    "dotenv": "^16.6.1",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "drizzle-orm": "^0.44.4",
+    "express": "^4.21.2",
     "helmet": "^8.1.0",
-    "morgan": "^1.10.1"
+    "morgan": "^1.10.1",
+    "pg": "^8.16.3",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@types/express": "^4.17.23",
-    "@types/node": "^20.19.9",
     "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
     "@types/morgan": "^1.9.10",
-    "typescript": "^5.9.2",
-    "tsx": "^4.20.3"
+    "@types/node": "^24.2.0",
+    "@types/pg": "^8.15.5",
+    "drizzle-kit": "^0.31.4",
+    "tsx": "^4.20.3",
+    "typescript": "^5.9.2"
   }
 }

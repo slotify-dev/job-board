@@ -1,11 +1,31 @@
 {
   "extends": "../../tsconfig.json",
-  "exclude": ["dist", "node_modules"],
-  "include": ["src/**/*", "vite.config.ts"],
   "compilerOptions": {
+    // React/Frontend specific environment
+    "target": "ESNext",
+    "module": "ESNext",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "moduleDetection": "force",
+
+    // Bundler mode (Vite specific)
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+
+    // Frontend project configuration
     "tsBuildInfoFile": "./.tsbuildinfo",
-    "composite": true,
     "outDir": "./dist",
-    "rootDir": "."
-  }
+    "rootDir": ".",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+
+    // React development flags
+    "noPropertyAccessFromIndexSignature": false
+  },
+  "include": ["src/**/*", "vite.config.ts"],
+  "exclude": ["dist", "node_modules"]
 }
