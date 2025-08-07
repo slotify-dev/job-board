@@ -49,7 +49,7 @@ services:
     ports:
       - '${PORT:-5173}:${PORT:-5173}'
     volumes:
-      - ./apps/frontend:/app/apps/frontend
+      - ./apps/frontend/src:/app/apps/frontend/src
       - frontend_node_modules:/app/node_modules
     environment:
       - NODE_ENV=development
