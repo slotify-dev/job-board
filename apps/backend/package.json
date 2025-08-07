@@ -6,13 +6,16 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "start": "bun src/server.ts",
-    "migrate:up": "drizzle-kit up",
-    "migrate:down": "drizzle-kit down",
     "dev": "bun --watch src/server.ts",
+    "build": "bun build src/server.ts --outdir ./dist --target bun",
     "format": "npx prettier --write src",
     "lint": "npx eslint src --ext .ts --fix",
-    "migrate:generate": "drizzle-kit generate:pg",
-    "build": "bun build src/server.ts --outdir ./dist --target bun"
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "db:drop": "drizzle-kit drop",
+    "db:migrate:run": "bun src/database/migrate.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",
