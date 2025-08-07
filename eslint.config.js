@@ -96,7 +96,15 @@ export default [
       globals: {
         browser: true,
         node: false,
+        document: 'readonly',
+        window: 'readonly',
+        console: 'readonly',
+        JSX: 'readonly',
       },
+    },
+    rules: {
+      'react/prop-types': 'off',
+      'react/react-in-jsx-scope': 'off',
     },
   },
 ];

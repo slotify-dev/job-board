@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState } from 'react';
 
 export function App(): JSX.Element {
-  const [count, setCount] = useState<number>(0)
+  const [count, setCount] = useState<number>(0);
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -16,5 +16,5 @@ export function App(): JSX.Element {
         </button>
       </div>
     </div>
-  )
+  );
 }

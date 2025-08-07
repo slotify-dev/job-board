@@ -26,8 +26,11 @@
   },
   "scripts": {
     "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "lint:md": "markdownlint-cli2 '**/*.md' '!**/node_modules/**'",
+    "lint:md:fix": "markdownlint-cli2 '**/*.md' '!**/node_modules/**' --fix",
     "format": "prettier --write .",
+    "format:all": "bun run lint:md:fix && bun run format && bun run lint:fix",
     "prepare": "husky"
   },
   "lint-staged": {
