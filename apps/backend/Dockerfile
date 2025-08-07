@@ -1,4 +1,5 @@
 FROM oven/bun:latest
+ARG PORT=3000
 WORKDIR /app
 
 # Copy package files (optimized for layer caching)
@@ -9,7 +10,7 @@ COPY apps/backend/package.json ./apps/backend/
 RUN bun install --frozen-lockfile
 
 # Copy source code (exclude unnecessary files via .dockerignore)
-COPY . .
+COPY apps/backend ./apps/backend
 
 # Create non-root user (combined for single layer)
 RUN addgroup --system --gid 1001 nodejs && \
@@ -17,7 +18,6 @@ RUN addgroup --system --gid 1001 nodejs && \
     chown -R bunuser:nodejs /app
 
 # Expose port (configurable via ENV)
-ARG PORT=3000
 EXPOSE ${PORT}
 ENV PORT=${PORT}
 
