@@ -1,11 +1,11 @@
 {
   "extends": "../../tsconfig.json",
+  "exclude": ["dist", "node_modules"],
+  "include": ["src/**/*", "vite.config.ts"],
   "compilerOptions": {
-    "composite": true,
     "tsBuildInfoFile": "./.tsbuildinfo",
+    "composite": true,
     "outDir": "./dist",
     "rootDir": "."
-  },
-  "include": ["src/**/*", "vite.config.ts"],
-  "exclude": ["dist", "node_modules"]
+  }
 }

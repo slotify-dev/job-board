@@ -7,40 +7,31 @@ and designed for a monorepo architecture.
 
 ---
 
-## 🔐 Authentication (via Okta)
+## 🔐 Authentication (via Auth0)
 
-Authentication is fully managed by **Okta** using the free Developer Plan (up to 1,000 MAUs). We will not build
+Authentication is fully managed by **Auth0** using the free Developer Plan (up to 1,000 MAUs). We will not build
 a custom auth layer.
 
-### 1. Login / Register (Hosted by Okta)
+### 1. Login / Register (Hosted by Auth0)
 
-- Redirect users to Okta-hosted login page
+- Redirect users to Auth0-hosted login page
 - Users sign up or log in with email/password or SSO (Google)
 - Frontend receives tokens and stores them securely
 
 ### 2. Google SSO
 
-- Enabled through Okta’s Identity Provider integration
+- Enabled through Auth0’s Identity Provider integration
 - Part of the same hosted login flow
 
 ### 3. Session Handling
 
-- Frontend stores access tokens via the Okta React SDK
+- Frontend stores access tokens via the Auth0 React SDK
 - Auto-refresh and access token storage handled internally
 
 ### 4. Logout
 
-- Calls `oktaAuth.signOut()`
+- Calls `Auth0Auth.signOut()`
 - Clears session and redirects back to homepage
-
-### Tools Used
-
-| Tool                                                                   | Purpose                          |
-| ---------------------------------------------------------------------- | -------------------------------- |
-| [@okta/okta-react](https://www.npmjs.com/package/@okta/okta-react)     | React SDK for secure routing     |
-| [@okta/okta-auth-js](https://www.npmjs.com/package/@okta/okta-auth-js) | Token handling, session tracking |
-
----
 
 ## 👤 Profile Management
 

@@ -1,20 +1,45 @@
-import { useState } from 'react';
+import { Toaster } from 'sonner';
+import { Provider } from 'react-redux';
+import { AppRoutes } from './AppRoutes';
+import { store } from './shared/store/store';
+import { Auth0Provider } from '@auth0/auth0-react';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+import {
+  auth0Config,
+  onRedirectCallback,
+} from './modules/auth/services/auth0Config';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 export function App(): JSX.Element {
-  const [count, setCount] = useState<number>(0);
-
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-md">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">Job Board</h1>
-        <p className="text-gray-600 mb-4">Frontend is ready!</p>
-        <button
-          onClick={() => setCount((count) => count + 1)}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Count is {count}
-        </button>
-      </div>
-    </div>
+    <Provider store={store}>
+      <QueryClientProvider client={queryClient}>
+        <Auth0Provider {...auth0Config} onRedirectCallback={onRedirectCallback}>
+          <Router>
+            <AppRoutes />
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                style: {
+                  color: 'black',
+                  background: 'white',
+                  border: '1px solid #e5e7eb',
+                },
+              }}
+            />
+          </Router>
+        </Auth0Provider>
+      </QueryClientProvider>
+    </Provider>
   );
 }

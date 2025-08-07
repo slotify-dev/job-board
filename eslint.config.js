@@ -94,12 +94,16 @@ export default [
     files: ['apps/frontend/**/*'],
     languageOptions: {
       globals: {
-        browser: true,
         node: false,
-        document: 'readonly',
+        browser: true,
+        JSX: 'readonly',
+        atob: 'readonly',
+        fetch: 'readonly',
         window: 'readonly',
         console: 'readonly',
-        JSX: 'readonly',
+        document: 'readonly',
+        localStorage: 'readonly',
+        sessionStorage: 'readonly',
       },
     },
     rules: {

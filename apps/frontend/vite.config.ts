@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  cacheDir: '/tmp/vite-cache',
   resolve: {
     alias: {
       '@': new URL('./src', import.meta.url).pathname,
@@ -23,7 +24,6 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
   },
-  cacheDir: '/tmp/vite-cache',
   optimizeDeps: {
     force: false,
   },
