@@ -11,7 +11,6 @@
     "@types/bun": "latest",
     "@typescript-eslint/eslint-plugin": "^8.39.0",
     "@typescript-eslint/parser": "^8.39.0",
-    "concurrently": "^9.2.0",
     "eslint": "^9.32.0",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-prettier": "^5.5.4",
@@ -26,7 +25,6 @@
     "typescript": "^5"
   },
   "scripts": {
-    "dev": "concurrently \"bun run --cwd apps/backend dev\" \"bun run --cwd apps/frontend dev\"",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:md": "markdownlint-cli2 '**/*.md' '!**/node_modules/**'",
     "format": "prettier --write .",
