@@ -1,26 +1,27 @@
 FROM oven/bun:latest
 WORKDIR /app
 
-# Copy package.json first for better caching
-COPY apps/backend/package.json ./apps/backend/
+# Copy package files (optimized for layer caching)
 COPY package.json bun.lockb* ./
+COPY apps/backend/package.json ./apps/backend/
 
 # Install dependencies
 RUN bun install --frozen-lockfile
 
-# Copy source code
+# Copy source code (exclude unnecessary files via .dockerignore)
 COPY . .
 
-# Create a non-root user
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 bunuser
+# Create non-root user (combined for single layer)
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 bunuser && \
+    chown -R bunuser:nodejs /app
 
-# Change ownership of the app directory
-RUN chown -R bunuser:nodejs /app
 USER bunuser
 
 # Expose port (configurable via ENV)
-EXPOSE 3000
+ARG PORT=3000
+EXPOSE ${PORT}
+ENV PORT=${PORT}
 
 # Set working directory to backend app
 WORKDIR /app/apps/backend

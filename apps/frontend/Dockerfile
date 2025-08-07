@@ -1,32 +1,35 @@
 FROM node:20-alpine
 WORKDIR /app
 
-# Install bun
-RUN npm install -g bun
+# 1. Install required dependencies (including bash)
+RUN apk add --no-cache bash unzip curl
 
-# Copy package.json first for better caching
-COPY apps/frontend/package.json ./apps/frontend/
+# 2. Install Bun using official method
+RUN curl -fsSL https://bun.sh/install | bash
+ENV BUN_INSTALL="/root/.bun"
+ENV PATH="$BUN_INSTALL/bin:$PATH"
+
+# 3. Verify installation
+RUN bun --version
+
+# 4. Copy package files (optimized for caching)
 COPY package.json bun.lockb* ./
+COPY apps/frontend/package.json ./apps/frontend/
 
-# Install dependencies
+# 5. Install dependencies
 RUN bun install --frozen-lockfile
 
-# Copy source code
+# 6. Copy remaining files
 COPY . .
 
-# Create a non-root user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S bunuser -u 1001
+# 7. Create non-root user (Alpine-compatible syntax)
+RUN addgroup -g 1001 nodejs && \
+    adduser -u 1001 -G nodejs -D bunuser && \
+    chown -R bunuser:nodejs /app
 
-# Change ownership of the app directory
-RUN chown -R bunuser:nodejs /app
+# 8. set user and work directory 
 USER bunuser
-
-# Expose Vite dev server port
-EXPOSE 5173
-
-# Set working directory to frontend app
 WORKDIR /app/apps/frontend
 
-# Default command for development with hot reload
-CMD ["bun", "run", "dev", "--host", "0.0.0.0", "--port", "5173"]
+EXPOSE 5173
+CMD ["bun", "run", "dev", "--host", "0.0.0.0"]

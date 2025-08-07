@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:alpine
     env_file: apps/backend/.env
     container_name: job-board-postgres
     environment:
@@ -8,15 +8,11 @@ services:
       POSTGRES_USER: ${PG_USER:-jobboard_user}
       POSTGRES_PASSWORD: ${PG_PASSWORD:-jobboard_password}
     ports:
-      - '5432:5432'
+      - '${PG_PORT:-5432}:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test:
-        [
-          'CMD-SHELL',
-          'pg_isready -U ${PG_USER:-jobboard_user} -d ${PG_DB:-jobboard}',
-        ]
+      test: ["CMD-SHELL", "pg_isready -U $${PG_USER:-jobboard_user} -d $${PG_DB:-jobboard}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -25,45 +21,37 @@ services:
     build:
       context: .
       dockerfile: ./apps/backend/Dockerfile
+    restart: unless-stopped
     env_file: apps/backend/.env
-    user: '${UID:-1000}:${GID:-1000}'
     container_name: job-board-backend
-    environment:
-      PORT: ${PORT:-3000}
-      NODE_ENV: development
-      DATABASE_URL: ${DATABASE_URL:-postgresql://jobboard_user:jobboard_password@postgres:5432/jobboard}
     ports:
       - '${PORT:-3000}:${PORT:-3000}'
     volumes:
-      - .:/app
+      - ./apps/backend:/app/apps/backend
       - backend_node_modules:/app/node_modules
     depends_on:
       postgres:
         condition: service_healthy
-    command: bun run dev
 
   frontend:
     build:
       context: .
       dockerfile: ./apps/frontend/Dockerfile
+    restart: unless-stopped
     env_file: apps/frontend/.env
-    user: '${UID:-1000}:${GID:-1000}'
     container_name: job-board-frontend
-    environment:
-      NODE_ENV: development
-      VITE_API_URL: http://localhost:${PORT:-3000}
     ports:
       - '5173:5173'
     volumes:
-      - .:/app
+      - ./apps/frontend:/app/apps/frontend
       - frontend_node_modules:/app/node_modules
       - frontend_vite_cache:/app/apps/frontend/node_modules/.vite
     depends_on:
       - backend
-    command: bun run dev
 
 volumes:
-  postgres_data:
+  frontend_vite_cache:
   backend_node_modules:
   frontend_node_modules:
-  frontend_vite_cache:
+  postgres_data:
+    driver: local
