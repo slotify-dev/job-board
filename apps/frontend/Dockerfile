@@ -5,6 +5,7 @@ WORKDIR /app
 RUN npm install -g bun
 
 # Copy package.json first for better caching
+COPY apps/frontend/package.json ./apps/frontend/
 COPY package.json bun.lockb* ./
 
 # Install dependencies
@@ -23,6 +24,9 @@ USER bunuser
 
 # Expose Vite dev server port
 EXPOSE 5173
+
+# Set working directory to frontend app
+WORKDIR /app/apps/frontend
 
 # Default command for development with hot reload
 CMD ["bun", "run", "dev", "--host", "0.0.0.0", "--port", "5173"]

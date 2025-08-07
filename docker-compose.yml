@@ -20,8 +20,8 @@ services:
 
   backend:
     build:
-      context: ./apps/backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./apps/backend/Dockerfile
     container_name: job-board-backend
     environment:
       PORT: ${PORT:-3000}
@@ -39,8 +39,8 @@ services:
 
   frontend:
     build:
-      context: ./apps/frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./apps/frontend/Dockerfile
     container_name: job-board-frontend
     environment:
       NODE_ENV: development
