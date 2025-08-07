@@ -9,8 +9,12 @@ This monorepo provides a complete full-stack development environment using Docke
 ## One-Line Setup
 
 ```bash
-# Copy environment file and start all services
-cp .env.example .env && docker-compose up --build
+# Copy environment files
+cp apps/backend/.env.example apps/backend/.env
+cp apps/frontend/.env.example apps/frontend/.env
+
+# build/start docker services
+docker-compose up --build
 ```
 
 That's it! The entire stack will be running with:
@@ -28,25 +32,6 @@ That's it! The entire stack will be running with:
 | **Backend**      | `http://localhost:3000/api`        | Express API with auto-reload   |
 | **Health Check** | `http://localhost:3000/api/health` | API health endpoint            |
 
-## Environment Configuration
-
-The `.env` file contains all necessary environment variables:
-
-```bash
-# Database Configuration
-PG_DB=jobboard
-PG_USER=jobboard_user
-PG_PASSWORD=jobboard_password
-
-# Application Configuration
-PORT=3000
-NODE_ENV=development
-DATABASE_URL=postgresql://jobboard_user:jobboard_password@postgres:5432/jobboard
-
-# Frontend Configuration
-VITE_API_URL=http://localhost:3000
-```
-
 ## Auto-Reloading Development
 
 Both frontend and backend support hot reload out of the box:
@@ -54,16 +39,6 @@ Both frontend and backend support hot reload out of the box:
 - **Backend**: Uses `bun --watch` for instant restarts on file changes
 - **Frontend**: Uses Vite dev server with HMR (Hot Module Replacement)
 - **API Proxy**: Frontend automatically proxies `/api` requests to backend
-
-## Database Connection
-
-Connect to PostgreSQL using any database tool:
-
-- **Host**: `localhost` (from host machine) or `postgres` (from containers)
-- **Port**: `5432`
-- **Database**: `jobboard`
-- **Username**: `jobboard_user`
-- **Password**: `jobboard_password`
 
 ## Development Workflow
 

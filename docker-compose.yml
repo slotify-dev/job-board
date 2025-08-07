@@ -1,6 +1,7 @@
 services:
   postgres:
     image: postgres:latest
+    env_file: apps/backend/.env
     container_name: job-board-postgres
     environment:
       POSTGRES_DB: ${PG_DB:-jobboard}
@@ -24,8 +25,9 @@ services:
     build:
       context: .
       dockerfile: ./apps/backend/Dockerfile
-    container_name: job-board-backend
+    env_file: apps/backend/.env
     user: '${UID:-1000}:${GID:-1000}'
+    container_name: job-board-backend
     environment:
       PORT: ${PORT:-3000}
       NODE_ENV: development
@@ -44,8 +46,9 @@ services:
     build:
       context: .
       dockerfile: ./apps/frontend/Dockerfile
-    container_name: job-board-frontend
+    env_file: apps/frontend/.env
     user: '${UID:-1000}:${GID:-1000}'
+    container_name: job-board-frontend
     environment:
       NODE_ENV: development
       VITE_API_URL: http://localhost:${PORT:-3000}
