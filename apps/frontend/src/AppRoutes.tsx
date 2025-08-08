@@ -4,8 +4,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 // Auth Components
 import { LoginPage } from './modules/auth/components/LoginPage';
 import { RegisterPage } from './modules/auth/components/RegisterPage';
-import { RoleSelectionPage } from './modules/auth/components/RoleSelectionPage';
-import { Auth0Callback } from './modules/auth/components/Auth0Callback';
+import { GoogleCallback } from './modules/auth/components/GoogleCallback';
 import {
   ProtectedRoute,
   PublicRoute,
@@ -21,7 +20,7 @@ import { JobDetailsPage } from './modules/job-browsing/pages/JobDetailsPage';
 import { MyApplicationsPage } from './modules/job-browsing/pages/MyApplicationsPage';
 
 export function AppRoutes() {
-  const { isAuthenticated, isNewAuth0User, isInitialized } = useAuth();
+  const { isAuthenticated, isInitialized } = useAuth();
 
   // Show loading screen while initializing
   if (!isInitialized) {
@@ -57,19 +56,7 @@ export function AppRoutes() {
           </PublicRoute>
         }
       />
-      <Route path="/auth/callback" element={<Auth0Callback />} />
-
-      {/* Role Selection for new Auth0 users */}
-      <Route
-        path="/auth/role-selection"
-        element={
-          isNewAuth0User ? (
-            <RoleSelectionPage />
-          ) : (
-            <Navigate to="/auth/login" replace />
-          )
-        }
-      />
+      <Route path="/auth/google/callback" element={<GoogleCallback />} />
 
       {/* Protected Job Seeker Routes */}
       <Route

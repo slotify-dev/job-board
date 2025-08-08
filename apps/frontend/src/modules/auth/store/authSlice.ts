@@ -2,10 +2,9 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type {
   AuthState,
-  AuthUser,
+  User, // eslint-disable-line @typescript-eslint/no-unused-vars
   LoginFormData,
   RegisterFormData,
-  RoleSelectionData,
 } from '../types/auth.types';
 import { authService } from '../services/authService';
 
@@ -59,63 +58,17 @@ export const getCurrentUserAsync = createAsyncThunk(
   },
 );
 
-export const linkAuth0AccountAsync = createAsyncThunk(
-  'auth/linkAuth0Account',
-  async (
-    { auth0Sub, roleData }: { auth0Sub: string; roleData: RoleSelectionData },
-    { rejectWithValue },
-  ) => {
-    try {
-      const user = await authService.linkAuth0Account(auth0Sub, roleData);
-      return user;
-    } catch (error) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : 'Failed to link account',
-      );
-    }
-  },
-);
-
-export const refreshTokenAsync = createAsyncThunk(
-  'auth/refreshToken',
-  async (_, { rejectWithValue, getState }) => {
-    try {
-      const newToken = await authService.refreshToken();
-      const state = getState() as { auth: AuthState };
-
-      if (state.auth.user) {
-        return {
-          ...state.auth.user,
-          accessToken: newToken,
-        };
-      }
-
-      throw new Error('No user found');
-    } catch (error) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : 'Token refresh failed',
-      );
-    }
-  },
-);
-
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
     logout: (state) => {
-      authService.logout();
+      // Note: logout will be handled async via the logout thunk
       state.user = null;
       state.isAuthenticated = false;
       state.error = null;
     },
     clearError: (state) => {
-      state.error = null;
-    },
-    setAuth0User: (state, action: PayloadAction<AuthUser>) => {
-      state.user = action.payload;
-      state.isAuthenticated = true;
-      state.isLoading = false;
       state.error = null;
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
@@ -181,37 +134,10 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
         state.isInitialized = true;
-      })
-
-      // Link Auth0 account
-      .addCase(linkAuth0AccountAsync.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(linkAuth0AccountAsync.fulfilled, (state, action) => {
-        state.user = action.payload;
-        state.isAuthenticated = true;
-        state.isLoading = false;
-        state.error = null;
-      })
-      .addCase(linkAuth0AccountAsync.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload as string;
-      })
-
-      // Refresh token
-      .addCase(refreshTokenAsync.fulfilled, (state, action) => {
-        state.user = action.payload;
-        state.isAuthenticated = true;
-      })
-      .addCase(refreshTokenAsync.rejected, (state) => {
-        state.user = null;
-        state.isAuthenticated = false;
-        authService.logout();
       });
   },
 });
 
-export const { logout, clearError, setAuth0User, setLoading, initialize } =
-  authSlice.actions;
+export const { logout, clearError, setLoading, initialize } = authSlice.actions;
+
 export default authSlice.reducer;

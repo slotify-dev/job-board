@@ -31,7 +31,7 @@ export interface RegisterFormData {
 }
 
 export interface AuthState {
-  user: AuthUser | null;
+  user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;

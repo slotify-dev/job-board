@@ -1,22 +1,26 @@
 import type {
   LoginFormData,
   RegisterFormData,
-  AuthUser,
   User,
-  RoleSelectionData,
+  UserRole,
 } from '../types/auth.types';
+
+interface OAuthCallbackData {
+  ssoId: string;
+  provider: 'google';
+  email: string;
+  role: UserRole;
+}
 
 import { formatAuthError } from '../utils/authHelpers';
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
+  import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 
 class AuthService {
   private getAuthHeaders(): Record<string, string> {
-    const token = localStorage.getItem('accessToken');
     return {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     };
   }
 
@@ -31,191 +35,195 @@ class AuthService {
     return response.json();
   }
 
-  async login(credentials: LoginFormData): Promise<AuthUser> {
+  async login(credentials: LoginFormData): Promise<User> {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: this.getAuthHeaders(),
-        body: JSON.stringify(credentials),
+        credentials: 'include', // Important for cookies
+        body: JSON.stringify({
+          email: credentials.email,
+          password: credentials.password,
+        }),
       });
 
       const data = await this.handleResponse<{
-        user: User;
-        accessToken: string;
-        refreshToken?: string;
+        success: boolean;
+        user: {
+          id: string;
+          uuid: string;
+          email: string;
+          role: string;
+          createdAt?: string;
+        };
       }>(response);
 
-      const authUser: AuthUser = {
-        ...data.user,
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
-      };
-
-      localStorage.setItem('accessToken', data.accessToken);
-      if (data.refreshToken) {
-        localStorage.setItem('refreshToken', data.refreshToken);
+      if (!data.success || !data.user) {
+        throw new Error('Login failed');
       }
 
-      return authUser;
+      // Convert backend user format to frontend format
+      const user: User = {
+        id: data.user.uuid || data.user.id,
+        email: data.user.email,
+        firstName: '', // Backend doesn't have these fields yet
+        lastName: '',
+        role: data.user.role as UserRole,
+        isEmailVerified: true, // Backend doesn't track this yet
+        createdAt: data.user.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      return user;
     } catch (error) {
       throw new Error(formatAuthError(error));
     }
   }
 
-  async register(userData: RegisterFormData): Promise<AuthUser> {
+  async register(userData: RegisterFormData): Promise<User> {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: this.getAuthHeaders(),
-        body: JSON.stringify(userData),
+        credentials: 'include', // Important for cookies
+        body: JSON.stringify({
+          email: userData.email,
+          password: userData.password,
+          role: userData.role,
+        }),
       });
 
       const data = await this.handleResponse<{
-        user: User;
-        accessToken: string;
-        refreshToken?: string;
+        success: boolean;
+        user: {
+          id: string;
+          uuid: string;
+          email: string;
+          role: string;
+          createdAt?: string;
+        };
       }>(response);
 
-      const authUser: AuthUser = {
-        ...data.user,
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
+      if (!data.success || !data.user) {
+        throw new Error('Registration failed');
+      }
+
+      // Convert backend user format to frontend format
+      const user: User = {
+        id: data.user.uuid || data.user.id,
+        email: data.user.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        role: data.user.role as UserRole,
+        isEmailVerified: true,
+        createdAt: data.user.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
-      localStorage.setItem('accessToken', data.accessToken);
-      if (data.refreshToken) {
-        localStorage.setItem('refreshToken', data.refreshToken);
-      }
-
-      return authUser;
+      return user;
     } catch (error) {
       throw new Error(formatAuthError(error));
     }
   }
 
-  async refreshToken(): Promise<string> {
+  async getCurrentUser(): Promise<User | null> {
     try {
-      const refreshToken = localStorage.getItem('refreshToken');
-      if (!refreshToken) {
-        throw new Error('No refresh token available');
-      }
-
-      const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({ refreshToken }),
-      });
-
-      const data = await this.handleResponse<{
-        accessToken: string;
-        refreshToken?: string;
-      }>(response);
-
-      localStorage.setItem('accessToken', data.accessToken);
-      if (data.refreshToken) {
-        localStorage.setItem('refreshToken', data.refreshToken);
-      }
-
-      return data.accessToken;
-    } catch (error) {
-      this.logout();
-      throw new Error(formatAuthError(error));
-    }
-  }
-
-  async getCurrentUser(): Promise<AuthUser | null> {
-    try {
-      const token = localStorage.getItem('accessToken');
-      if (!token) {
-        return null;
-      }
-
       const response = await fetch(`${API_BASE_URL}/auth/me`, {
         headers: this.getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) {
         if (response.status === 401) {
-          try {
-            const newToken = await this.refreshToken();
-            const retryResponse = await fetch(`${API_BASE_URL}/auth/me`, {
-              headers: {
-                ...this.getAuthHeaders(),
-                Authorization: `Bearer ${newToken}`,
-              },
-            });
-
-            if (retryResponse.ok) {
-              const userData = await retryResponse.json();
-              return {
-                ...userData.user,
-                accessToken: newToken,
-              };
-            }
-          } catch {
-            this.logout();
-            return null;
-          }
+          // User is not authenticated
+          return null;
         }
-
-        this.logout();
-        return null;
+        throw new Error('Failed to get user info');
       }
 
       const data = await response.json();
-      return {
-        ...data.user,
-        accessToken: token,
+
+      if (!data.success || !data.user) {
+        return null;
+      }
+
+      // Convert backend user format to frontend format
+      const user: User = {
+        id: data.user.uuid || data.user.id,
+        email: data.user.email,
+        firstName: data.user.firstName || '',
+        lastName: data.user.lastName || '',
+        role: data.user.role as UserRole,
+        isEmailVerified: data.user.isEmailVerified || true,
+        createdAt: data.user.createdAt || new Date().toISOString(),
+        updatedAt: data.user.updatedAt || new Date().toISOString(),
       };
+
+      return user;
     } catch (error) {
       console.error('Failed to get current user:', error);
-      this.logout();
       return null;
     }
   }
 
-  async linkAuth0Account(
-    auth0Sub: string,
-    roleData: RoleSelectionData,
-  ): Promise<AuthUser> {
+  async oauthCallback(oauthData: OAuthCallbackData): Promise<User> {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/link-auth0`, {
+      const response = await fetch(`${API_BASE_URL}/auth/oauth/callback`, {
         method: 'POST',
         headers: this.getAuthHeaders(),
-        body: JSON.stringify({ auth0Sub, ...roleData }),
+        credentials: 'include',
+        body: JSON.stringify(oauthData),
       });
 
       const data = await this.handleResponse<{
-        user: User;
-        accessToken: string;
-        refreshToken?: string;
+        success: boolean;
+        user: {
+          id: string;
+          uuid: string;
+          email: string;
+          role: string;
+          createdAt?: string;
+        };
       }>(response);
 
-      const authUser: AuthUser = {
-        ...data.user,
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
-      };
-
-      localStorage.setItem('accessToken', data.accessToken);
-      if (data.refreshToken) {
-        localStorage.setItem('refreshToken', data.refreshToken);
+      if (!data.success || !data.user) {
+        throw new Error('OAuth callback failed');
       }
 
-      return authUser;
+      // Convert backend user format to frontend format
+      const user: User = {
+        id: data.user.uuid || data.user.id,
+        email: data.user.email,
+        firstName: '', // Backend doesn't have these fields yet
+        lastName: '',
+        role: data.user.role as UserRole,
+        isEmailVerified: true,
+        createdAt: data.user.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      return user;
     } catch (error) {
       throw new Error(formatAuthError(error));
     }
   }
 
-  logout(): void {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+  async logout(): Promise<void> {
+    try {
+      await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        credentials: 'include',
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   }
 
   isAuthenticated(): boolean {
-    const token = localStorage.getItem('accessToken');
-    return !!token;
+    // With cookie-based auth, we can't easily check client-side
+    // This will be determined by the getCurrentUser call
+    return false;
   }
 }
 

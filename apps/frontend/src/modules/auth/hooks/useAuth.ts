@@ -1,101 +1,68 @@
 import { useEffect } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
 import { useAppDispatch, useAppSelector } from '../../../shared/store/store';
 import {
   getCurrentUserAsync,
-  setAuth0User,
+  loginAsync,
+  registerAsync,
   setLoading,
   initialize,
   logout as reduxLogout,
 } from '../store/authSlice';
-import type { AuthUser } from '../types/auth.types';
+import { authService } from '../services/authService';
+import type { LoginFormData, RegisterFormData } from '../types/auth.types';
 
 export function useAuth() {
   const dispatch = useAppDispatch();
   const authState = useAppSelector((state) => state.auth);
 
-  const {
-    isAuthenticated: auth0IsAuthenticated,
-    isLoading: auth0IsLoading,
-    user: auth0User,
-    getAccessTokenSilently,
-    logout: auth0Logout,
-  } = useAuth0();
-
   // Initialize auth state on app startup
   useEffect(() => {
     const initializeAuth = async () => {
       if (!authState.isInitialized) {
-        if (!auth0IsLoading) {
-          if (auth0IsAuthenticated && auth0User) {
-            // User is authenticated with Auth0
-            try {
-              dispatch(setLoading(true));
-              const token = await getAccessTokenSilently();
+        dispatch(setLoading(true));
 
-              // Check if this is a new Auth0 user or existing user
-              const result = await dispatch(getCurrentUserAsync());
-
-              if (
-                getCurrentUserAsync.fulfilled.match(result) &&
-                result.payload
-              ) {
-                // Existing user found
-                const authUser: AuthUser = {
-                  ...result.payload,
-                  accessToken: token,
-                };
-                dispatch(setAuth0User(authUser));
-              } else {
-                // New Auth0 user - they'll need to select a role
-                // This will be handled by the routing logic
-                dispatch(initialize());
-              }
-            } catch (error) {
-              console.error('Auth initialization error:', error);
-              dispatch(initialize());
-            }
-          } else {
-            // Check for existing session (traditional auth)
-            await dispatch(getCurrentUserAsync());
-          }
+        try {
+          // Try to get current user from backend (checks cookie)
+          await dispatch(getCurrentUserAsync());
+        } catch (error) {
+          console.error('Failed to initialize auth:', error);
         }
+
+        dispatch(initialize());
+        dispatch(setLoading(false));
       }
     };
 
     initializeAuth();
-  }, [
-    auth0IsAuthenticated,
-    auth0IsLoading,
-    auth0User,
-    authState.isInitialized,
-    dispatch,
-    getAccessTokenSilently,
-  ]);
+  }, [dispatch, authState.isInitialized]);
+
+  const login = async (credentials: LoginFormData) => {
+    const result = await dispatch(loginAsync(credentials));
+    return result;
+  };
+
+  const register = async (userData: RegisterFormData) => {
+    const result = await dispatch(registerAsync(userData));
+    return result;
+  };
 
   const logout = async () => {
-    dispatch(reduxLogout());
-
-    if (auth0IsAuthenticated) {
-      await auth0Logout({
-        logoutParams: {
-          returnTo: window.location.origin + '/auth/login',
-        },
-      });
+    // Call backend logout first, then update Redux state
+    try {
+      await authService.logout();
+    } finally {
+      dispatch(reduxLogout());
     }
   };
 
-  const isNewAuth0User =
-    auth0IsAuthenticated &&
-    auth0User &&
-    !authState.isAuthenticated &&
-    authState.isInitialized;
-
   return {
-    ...authState,
+    user: authState.user,
+    isAuthenticated: authState.isAuthenticated,
+    isLoading: authState.isLoading,
+    error: authState.error,
+    isInitialized: authState.isInitialized,
+    login,
+    register,
     logout,
-    auth0User,
-    isNewAuth0User,
-    auth0IsAuthenticated,
   };
 }

@@ -1,6 +1,7 @@
 import { RegisterForm } from './RegisterForm';
-import { Auth0LoginButton } from './Auth0LoginButton';
+import { GoogleLoginButton } from './GoogleLoginButton';
 import { Layout } from '../../../shared/components/layout';
+
 export function RegisterPage() {
   const handleRegisterSuccess = () => {
     // The useAuth hook will handle the redirect automatically
@@ -10,17 +11,8 @@ export function RegisterPage() {
     <Layout>
       <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-black mb-2">
-              Create Account
-            </h1>
-            <p className="text-primary-600">
-              Join JobBoard to find your dream job
-            </p>
-          </div>
-
           <div className="space-y-4">
-            <Auth0LoginButton>Sign up with Google</Auth0LoginButton>
+            <GoogleLoginButton>Sign up with Google</GoogleLoginButton>
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
