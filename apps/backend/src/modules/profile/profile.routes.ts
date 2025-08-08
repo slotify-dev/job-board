@@ -1,8 +1,11 @@
 import { Router } from 'express';
 import { ProfileController } from './profile.controller';
+import { authMiddleware } from '../../middleware/authMiddleware';
 
 const router = Router();
 const profileController = new ProfileController();
+
+router.use(authMiddleware);
 
 // Profile routes (authenticated users only)
 router.get('/', profileController.getProfile.bind(profileController));

@@ -1,46 +1,76 @@
-export interface CreateJobRequest {
+import { z } from 'zod';
+
+export const createJobSchema = z.object({
+  title: z.string().min(1).max(255),
+  description: z.string().min(1),
+  location: z.string().max(255).optional(),
+  status: z.enum(['active', 'draft']).default('active'),
+});
+
+export const updateJobSchema = z.object({
+  title: z.string().min(1).max(255).optional(),
+  description: z.string().min(1).optional(),
+  location: z.string().max(255).optional(),
+  status: z.enum(['active', 'closed', 'draft']).optional(),
+});
+
+export const updateApplicationStatusSchema = z.object({
+  status: z.enum(['reviewed', 'accepted', 'rejected']),
+});
+
+export const jobParamsSchema = z.object({
+  uuid: z.string().uuid(),
+});
+
+export const applicationParamsSchema = z.object({
+  uuid: z.string().uuid(),
+});
+
+export interface EmployerJob {
+  id: number;
+  uuid: string;
   title: string;
   description: string;
-  location?: string;
-  status?: 'active' | 'draft';
+  location: string | null;
+  status: string;
+  createdAt: Date;
 }
 
-export interface UpdateJobRequest {
-  title?: string;
-  description?: string;
-  location?: string;
-  status?: 'active' | 'closed' | 'draft';
-}
-
-export interface JobApplication {
-  id: string;
-  jobId: string;
-  jobSeekerId: string;
+export interface JobApplicationWithSeeker {
+  uuid: string;
+  jobId: number;
+  jobSeekerId: number;
   resumeUrl: string;
-  coverLetter?: string;
-  status: 'pending' | 'reviewed' | 'accepted' | 'rejected';
-  createdAt: string;
-  jobSeekerName?: string;
-}
-
-export interface UpdateApplicationStatusRequest {
-  status: 'reviewed' | 'accepted' | 'rejected';
+  coverLetter: string | null;
+  status: string;
+  createdAt: Date;
+  jobSeekerName: string;
+  jobSeekerContactInfo: string | null;
 }
 
 export interface EmployerJobsResponse {
   success: boolean;
-  jobs?: Array<{
-    id: string;
-    title: string;
-    description: string;
-    location?: string;
-    status: string;
-    createdAt: string;
-  }>;
+  jobs: EmployerJob[];
 }
 
 export interface JobApplicationsResponse {
   success: boolean;
-  applications?: JobApplication[];
-  total?: number;
+  applications: JobApplicationWithSeeker[];
 }
+
+export interface JobResponse {
+  success: boolean;
+  job?: EmployerJob;
+}
+
+export interface ApplicationStatusResponse {
+  success: boolean;
+}
+
+export type CreateJobRequest = z.infer<typeof createJobSchema>;
+export type UpdateJobRequest = z.infer<typeof updateJobSchema>;
+export type UpdateApplicationStatusRequest = z.infer<
+  typeof updateApplicationStatusSchema
+>;
+export type JobParams = z.infer<typeof jobParamsSchema>;
+export type ApplicationParams = z.infer<typeof applicationParamsSchema>;

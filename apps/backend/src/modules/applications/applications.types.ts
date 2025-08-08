@@ -1,31 +1,35 @@
-export interface CreateApplicationRequest {
-  resumeUrl: string;
-  coverLetter?: string;
-}
+import { z } from 'zod';
 
-export interface Application {
-  id: string;
-  jobId: string;
-  jobSeekerId: string;
+export const createApplicationSchema = z.object({
+  resumeUrl: z.string().url(),
+  coverLetter: z.string().max(2000).optional(),
+});
+
+export const jobParamsSchema = z.object({
+  uuid: z.string().uuid(),
+});
+
+export interface ApplicationWithJob {
+  uuid: string;
+  jobId: number;
+  jobSeekerId: number;
   resumeUrl: string;
-  coverLetter?: string;
-  status: 'pending' | 'reviewed' | 'accepted' | 'rejected';
-  createdAt: string;
-  job?: {
-    id: string;
-    title: string;
-    company: string;
-    location?: string;
-  };
+  coverLetter: string | null;
+  status: string;
+  createdAt: Date;
+  jobTitle: string;
+  companyName: string;
 }
 
 export interface MyApplicationsResponse {
   success: boolean;
-  applications?: Application[];
-  total?: number;
+  applications: ApplicationWithJob[];
 }
 
 export interface ApplicationResponse {
   success: boolean;
-  application?: Application;
+  application?: ApplicationWithJob;
 }
+
+export type CreateApplicationRequest = z.infer<typeof createApplicationSchema>;
+export type JobParams = z.infer<typeof jobParamsSchema>;
