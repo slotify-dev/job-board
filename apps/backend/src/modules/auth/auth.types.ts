@@ -1,29 +1,38 @@
-export interface RegisterRequest {
-  email: string;
-  password: string;
-  role: 'job_seeker' | 'employer';
-  fullName?: string;
-  companyName?: string;
-}
+import { z } from 'zod';
 
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
+export const registerSchema = z.object({
+  role: z.enum(['job_seeker', 'employer']).default('job_seeker'),
+  email: z.string().email('Please provide a valid email address').toLowerCase(),
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters long')
+    .max(128, 'Password must not exceed 128 characters')
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      'Password must contain at least one lowercase letter, one uppercase letter, and one number',
+    ),
+});
 
-export interface OAuthCallbackRequest {
-  code: string;
-  state?: string;
-}
+export const loginSchema = z.object({
+  password: z.string().min(1, 'Password is required'),
+  email: z.string().email('Please provide a valid email address').toLowerCase(),
+});
+
+export const oauthCallbackSchema = z.object({
+  ssoId: z.string().min(1, 'SSO ID is required'),
+  provider: z.enum(['google']).describe('OAuth provider'),
+  role: z.enum(['job_seeker', 'employer']).default('job_seeker'),
+  email: z.string().email('Please provide a valid email address').toLowerCase(),
+});
 
 export interface AuthResponse {
   success: boolean;
+  token?: string;
   user?: {
     id: string;
-    email: string;
     role: string;
+    email: string;
   };
-  token?: string;
 }
 
 export interface UserResponse {
@@ -35,3 +44,7 @@ export interface UserResponse {
     createdAt: string;
   };
 }
+
+export type LoginRequest = z.infer<typeof loginSchema>;
+export type RegisterRequest = z.infer<typeof registerSchema>;
+export type OAuthCallbackRequest = z.infer<typeof oauthCallbackSchema>;

@@ -27,11 +27,11 @@ services:
       dockerfile: ./apps/backend/Dockerfile
     restart: unless-stopped
     env_file: apps/backend/.env
-    user: "${UID:-1000}:${GID:-1000}"
+    user: '${UID:-1000}:${GID:-1000}'
     container_name: job-board-backend
     environment:
       - NODE_ENV=development
-      - BUN_INSTALL_CACHE=/app/.bun-cache    
+      - BUN_INSTALL_CACHE=/app/.bun-cache
     ports:
       - '${PORT:-3000}:${PORT:-3000}'
     volumes:
@@ -48,7 +48,7 @@ services:
       dockerfile: apps/frontend/Dockerfile
     restart: unless-stopped
     env_file: apps/frontend/.env
-    user: "${UID:-1000}:${GID:-1000}"
+    user: '${UID:-1000}:${GID:-1000}'
     container_name: job-board-frontend
     ports:
       - '${PORT:-5173}:${PORT:-5173}'
