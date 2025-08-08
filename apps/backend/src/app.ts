@@ -19,26 +19,7 @@ import { globalRateLimit } from './middleware/rateLimiters.js';
 export const createApp = (): Application => {
   const app = express();
 
-  app.use(
-    helmet({
-      noSniff: true,
-      xssFilter: true,
-      frameguard: { action: 'deny' },
-      dnsPrefetchControl: { allow: false },
-      referrerPolicy: { policy: 'no-referrer' },
-      permittedCrossDomainPolicies: { permittedPolicies: 'none' },
-      hsts: { maxAge: 63072000, includeSubDomains: true, preload: true },
-      contentSecurityPolicy: {
-        directives: {
-          objectSrc: ['none'],
-          defaultSrc: ['self'],
-          upgradeInsecureRequests: [],
-          scriptSrc: ['self', 'unsafe-inline'],
-        },
-      },
-    }),
-  );
-
+  app.use(helmet());
   app.use(
     cors({
       credentials: true,
