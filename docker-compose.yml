@@ -23,14 +23,15 @@ services:
 
   redis:
     image: redis:7-alpine
+    env_file: apps/backend/.env
     container_name: job-board-redis
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-}
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-defaultpass}
     ports:
       - '${REDIS_PORT:-6379}:6379'
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ['CMD', 'redis-cli', '--no-auth-warning', '-a', '${REDIS_PASSWORD:-defaultpass}', 'ping']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -49,7 +50,7 @@ services:
       - NODE_ENV=development
       - BUN_INSTALL_CACHE=/app/.bun-cache
     ports:
-      - '${PORT:-3000}:${PORT:-3000}'
+      - '${BACKEND_PORT:-3000}:${BACKEND_PORT:-3000}'
     volumes:
       - ./apps/backend/src:/app/apps/backend/src:rw
       - ./apps/backend/drizzle.config.ts:/app/apps/backend/drizzle.config.ts:ro
@@ -69,7 +70,7 @@ services:
     user: '${UID:-1000}:${GID:-1000}'
     container_name: job-board-frontend
     ports:
-      - '${PORT:-5173}:${PORT:-5173}'
+      - '${FRONTEND_PORT:-5173}:${FRONTEND_PORT:-5173}'
     volumes:
       - ./apps/frontend/src:/app/apps/frontend/src
       - frontend_node_modules:/app/node_modules
