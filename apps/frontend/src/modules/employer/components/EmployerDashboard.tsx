@@ -1,11 +1,15 @@
+import { Link } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../../../shared/store/store';
 import { logout } from '../../auth/store/authSlice';
 import { getUserDisplayName } from '../../auth/utils/authHelpers';
+import { useEmployerJobs } from '../hooks/useEmployerJobs';
+import { JobManagementTable } from './JobManagementTable';
 import { toast } from 'sonner';
 
 export function EmployerDashboard() {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
+  const { jobs, loading } = useEmployerJobs();
 
   const handleLogout = () => {
     dispatch(logout());
@@ -56,7 +60,11 @@ export function EmployerDashboard() {
             </div>
             <div className="bg-primary-100 p-4 rounded-lg">
               <div className="text-center">
-                <div className="text-2xl font-bold text-black">0</div>
+                <div className="text-2xl font-bold text-black">
+                  {loading
+                    ? '-'
+                    : jobs.filter((job) => job.status === 'active').length}
+                </div>
                 <div className="text-sm text-primary-600">Active Job Posts</div>
               </div>
             </div>
@@ -65,7 +73,10 @@ export function EmployerDashboard() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="card hover:shadow-md transition-shadow cursor-pointer">
+          <Link
+            to="/employer/post-job"
+            className="card hover:shadow-md transition-shadow cursor-pointer"
+          >
             <div className="text-center">
               <div className="w-12 h-12 bg-black rounded-lg mx-auto mb-3 flex items-center justify-center">
                 <svg
@@ -87,7 +98,7 @@ export function EmployerDashboard() {
                 Create a new job listing
               </p>
             </div>
-          </div>
+          </Link>
 
           <div className="card hover:shadow-md transition-shadow cursor-pointer">
             <div className="text-center">
@@ -107,7 +118,9 @@ export function EmployerDashboard() {
                 </svg>
               </div>
               <h3 className="font-medium text-black mb-1">My Job Posts</h3>
-              <p className="text-sm text-primary-600">Manage your listings</p>
+              <p className="text-sm text-primary-600">
+                {loading ? 'Loading...' : `${jobs.length} total jobs`}
+              </p>
             </div>
           </div>
 
@@ -138,60 +151,49 @@ export function EmployerDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white p-6 rounded-lg border border-primary-200">
             <div className="text-center">
-              <div className="text-2xl font-bold text-black">0</div>
-              <div className="text-sm text-primary-600">Total Views</div>
+              <div className="text-2xl font-bold text-black">
+                {loading ? '-' : jobs.length}
+              </div>
+              <div className="text-sm text-primary-600">Total Jobs</div>
             </div>
           </div>
 
           <div className="bg-white p-6 rounded-lg border border-primary-200">
             <div className="text-center">
-              <div className="text-2xl font-bold text-black">0</div>
-              <div className="text-sm text-primary-600">Applications</div>
+              <div className="text-2xl font-bold text-black">
+                {loading
+                  ? '-'
+                  : jobs.filter((job) => job.status === 'active').length}
+              </div>
+              <div className="text-sm text-primary-600">Active Jobs</div>
             </div>
           </div>
 
           <div className="bg-white p-6 rounded-lg border border-primary-200">
             <div className="text-center">
-              <div className="text-2xl font-bold text-black">0</div>
-              <div className="text-sm text-primary-600">Interviews</div>
+              <div className="text-2xl font-bold text-black">
+                {loading
+                  ? '-'
+                  : jobs.filter((job) => job.status === 'draft').length}
+              </div>
+              <div className="text-sm text-primary-600">Draft Jobs</div>
             </div>
           </div>
 
           <div className="bg-white p-6 rounded-lg border border-primary-200">
             <div className="text-center">
-              <div className="text-2xl font-bold text-black">0</div>
-              <div className="text-sm text-primary-600">Hires</div>
+              <div className="text-2xl font-bold text-black">
+                {loading
+                  ? '-'
+                  : jobs.filter((job) => job.status === 'closed').length}
+              </div>
+              <div className="text-sm text-primary-600">Closed Jobs</div>
             </div>
           </div>
         </div>
 
-        {/* Recent Activity */}
-        <div className="card">
-          <h3 className="text-lg font-medium text-black mb-4">
-            Recent Activity
-          </h3>
-          <div className="text-center py-8">
-            <div className="text-primary-400 mb-3">
-              <svg
-                className="w-12 h-12 mx-auto"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1}
-                  d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                />
-              </svg>
-            </div>
-            <p className="text-primary-600">No recent activity</p>
-            <p className="text-sm text-primary-500 mt-1">
-              Post your first job to see activity here
-            </p>
-          </div>
-        </div>
+        {/* Job Management Section */}
+        <JobManagementTable />
       </main>
     </div>
   );

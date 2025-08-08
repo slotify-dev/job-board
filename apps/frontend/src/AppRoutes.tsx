@@ -12,7 +12,11 @@ import {
 
 // Dashboard Components
 import { JobSeekerDashboard } from './modules/jobSeeker/components/JobSeekerDashboard';
-import { EmployerDashboard } from './modules/employer/components/EmployerDashboard';
+import {
+  EmployerDashboard,
+  PostJobPage,
+  EditJobPage,
+} from './modules/employer';
 
 // Job Browsing Components
 import { HomePage } from './modules/job-browsing/pages/HomePage';
@@ -82,6 +86,32 @@ export function AppRoutes() {
         element={
           <ProtectedRoute roles={['employer']}>
             <EmployerDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Employer Job Management Routes */}
+      <Route
+        path="/employer/dashboard"
+        element={
+          <ProtectedRoute roles={['employer']}>
+            <EmployerDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/employer/post-job"
+        element={
+          <ProtectedRoute roles={['employer']}>
+            <PostJobPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/employer/edit-job/:jobId"
+        element={
+          <ProtectedRoute roles={['employer']}>
+            <EditJobPage />
           </ProtectedRoute>
         }
       />
