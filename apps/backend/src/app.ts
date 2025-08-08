@@ -1,16 +1,17 @@
-import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import express from 'express';
+
 import type { Application } from 'express';
 import { isDevelopment } from './config/env.js';
-import { healthRoutes } from './modules/health/health.routes.js';
 import { authRoutes } from './modules/auth/auth.routes.js';
 import { jobsRoutes } from './modules/jobs/jobs.routes.js';
+import { errorMiddleware } from './middleware/errorMiddleware.js';
+import { healthRoutes } from './modules/health/health.routes.js';
 import { profileRoutes } from './modules/profile/profile.routes.js';
 import { employerRoutes } from './modules/employer/employer.routes.js';
 import { applicationsRoutes } from './modules/applications/applications.routes.js';
-import { errorHandler } from './middleware/errorHandler.js';
 
 export const createApp = (): Application => {
   const app = express();
@@ -35,7 +36,7 @@ export const createApp = (): Application => {
   app.use('/api/me/profile', profileRoutes);
 
   // Error handling middleware (must be last)
-  app.use(errorHandler);
+  app.use(errorMiddleware);
 
   return app;
 };

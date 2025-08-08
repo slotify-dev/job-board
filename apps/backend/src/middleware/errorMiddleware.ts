@@ -14,7 +14,7 @@ interface ErrorResponse {
   };
 }
 
-export const errorHandler = (
+export const errorMiddleware = (
   err: ApiError,
   req: Request,
   res: Response,

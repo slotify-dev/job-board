@@ -1,17 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import UserRepository from '../database/repository/user';
-
-const JWT_SECRET = process.env.JWT_SECRET;
-const COOKIE_NAME = 'authToken';
+import { authConfig } from '../config';
 
 declare module 'express-serve-static-core' {
   interface Request {
     user?: {
       id: number;
+      role: string;
       uuid: string;
       email: string;
-      role: string;
       createdAt: Date;
     };
   }
@@ -23,13 +21,15 @@ export async function authMiddleware(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const token = req.cookies?.[COOKIE_NAME];
+    const token = req.cookies?.[authConfig.cookieName];
     if (!token) {
       res.status(401).json({ error: 'Unauthorized' });
       return;
     }
 
-    const payload = jwt.verify(token, JWT_SECRET!) as { userId: number };
+    const payload = jwt.verify(token, authConfig.jwtSecret) as {
+      userId: number;
+    };
     if (!payload || !payload.userId) {
       res.status(401).json({ error: 'Unauthorized' });
       return;
@@ -43,9 +43,9 @@ export async function authMiddleware(
 
     req.user = {
       id: user.id,
+      role: user.role,
       uuid: user.uuid,
       email: user.email,
-      role: user.role,
       createdAt: user.createdAt,
     };
 

@@ -12,6 +12,7 @@ const envSchema = z.object({
     .transform((val) => parseInt(val, 10))
     .default('3000'),
   API_VERSION: z.string().default('v1'),
+  JWT_SECRET: z.string().min(1, 'JWT_SECRET is required'),
 });
 
 type Environment = z.infer<typeof envSchema>;
@@ -29,5 +30,4 @@ const parseEnv = (): Environment => {
 };
 
 export const env = parseEnv();
-
 export const isDevelopment = env.NODE_ENV === 'development';

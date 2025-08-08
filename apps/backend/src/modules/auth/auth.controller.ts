@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { authConfig } from '../../config';
 
 import {
   LoginRequest,
@@ -9,16 +10,6 @@ import {
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import UserRepository from '../../database/repository/user';
-
-const JWT_SECRET = process.env.JWT_SECRET;
-const COOKIE_NAME = 'authToken';
-const COOKIE_OPTIONS = {
-  secure: process.env.NODE_ENV === 'production',
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-  sameSite: 'lax' as const,
-  httpOnly: true,
-  path: '/',
-};
 
 export class AuthController {
   async register(req: Request<object, object, RegisterRequest>, res: Response) {
@@ -35,8 +26,8 @@ export class AuthController {
         email: req.body.email,
       });
 
-      const token = jwt.sign({ userId: newUser.id }, JWT_SECRET!);
-      res.cookie(COOKIE_NAME, token, COOKIE_OPTIONS);
+      const token = jwt.sign({ userId: newUser.id }, authConfig.jwtSecret);
+      res.cookie(authConfig.cookieName, token, authConfig.cookieOptions);
 
       return res.status(201).json({
         success: true,
@@ -70,8 +61,8 @@ export class AuthController {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
 
-      const token = jwt.sign({ userId: user.id }, JWT_SECRET!);
-      res.cookie(COOKIE_NAME, token, COOKIE_OPTIONS);
+      const token = jwt.sign({ userId: user.id }, authConfig.jwtSecret);
+      res.cookie(authConfig.cookieName, token, authConfig.cookieOptions);
 
       return res.json({
         success: true,
@@ -128,16 +119,16 @@ export class AuthController {
           .json({ error: 'Failed to create or update user' });
       }
 
-      const token = jwt.sign({ userId: user.id }, JWT_SECRET!);
-      res.cookie(COOKIE_NAME, token, COOKIE_OPTIONS);
+      const token = jwt.sign({ userId: user.id }, authConfig.jwtSecret);
+      res.cookie(authConfig.cookieName, token, authConfig.cookieOptions);
 
       return res.json({
         success: true,
         user: {
           id: user.id,
+          role: user.role,
           uuid: user.uuid,
           email: user.email,
-          role: user.role,
         },
       });
     } catch {
@@ -155,7 +146,7 @@ export class AuthController {
   }
 
   async logout(req: Request<object, object>, res: Response) {
-    res.clearCookie(COOKIE_NAME, COOKIE_OPTIONS);
+    res.clearCookie(authConfig.cookieName, authConfig.cookieOptions);
     res.json({ success: true });
   }
 }
