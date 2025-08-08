@@ -15,6 +15,10 @@ import {
 import { JobSeekerDashboard } from './modules/jobSeeker/components/JobSeekerDashboard';
 import { EmployerDashboard } from './modules/employer/components/EmployerDashboard';
 
+// Job Browsing Components
+import { HomePage } from './modules/job-browsing/pages/HomePage';
+import { JobDetailsPage } from './modules/job-browsing/pages/JobDetailsPage';
+
 export function AppRoutes() {
   const { isAuthenticated, isNewAuth0User, isInitialized } = useAuth();
 
@@ -33,6 +37,9 @@ export function AppRoutes() {
   return (
     <Routes>
       {/* Public Routes */}
+      <Route path="/" element={<HomePage />} />
+      <Route path="/jobs/:uuid" element={<JobDetailsPage />} />
+
       <Route
         path="/auth/login"
         element={
@@ -81,9 +88,9 @@ export function AppRoutes() {
         }
       />
 
-      {/* Default redirects */}
+      {/* Dashboard redirect */}
       <Route
-        path="/"
+        path="/dashboard"
         element={
           isAuthenticated ? (
             <Navigate to="/dashboard/job-seeker" replace />

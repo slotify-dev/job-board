@@ -44,4 +44,11 @@
   .loading-spinner {
     @apply animate-spin h-5 w-5 border-2 border-primary-300 border-t-black rounded-full;
   }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 }

@@ -5,9 +5,7 @@ import type { TypedUseSelectorHook } from 'react-redux';
 import authReducer from '../../modules/auth/store/authSlice';
 
 export const store = configureStore({
-  devTools:
-    import.meta.env.DEV === 'true' ||
-    import.meta.env.NODE_ENV === 'development',
+  devTools: import.meta.env.NODE_ENV === 'development',
   reducer: {
     auth: authReducer,
   },

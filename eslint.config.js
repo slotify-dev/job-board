@@ -15,6 +15,8 @@ export default [
       '**/build/**',
       '.next/**',
       'coverage/**',
+      '**/seed.ts',
+      '**/*.sql',
     ],
   },
   js.configs.recommended,

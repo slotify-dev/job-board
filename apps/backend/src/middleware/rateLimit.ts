@@ -87,7 +87,8 @@ const createRateLimit = (config: RateLimitConfig = {}) => {
         const originalEnd = res.end.bind(res);
         let requestCounted = false;
 
-        res.end = function (...args: Parameters<typeof originalEnd>) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (res as any).end = function (...args: any[]) {
           if (!requestCounted) {
             const shouldSkip =
               (finalConfig.skipSuccessfulRequests && res.statusCode < 400) ||

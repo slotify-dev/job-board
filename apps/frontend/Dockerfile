@@ -1,26 +1,23 @@
-FROM oven/bun:alpine
+FROM node:18-alpine
 WORKDIR /app
 
 # adguments
 ARG PORT=5173
 
-# Set Bun cache directory
-ENV BUN_INSTALL_CACHE=/app/.bun-cache
-
 # 1. First copy only package files for better caching
-COPY package.json bun.lockb* ./
+COPY package.json ./
 COPY apps/frontend/package.json ./apps/frontend/
 
 # 2. Install dependencies
-RUN bun install --frozen-lockfile
+RUN npm install
 
-# 3. Copy source code (exclude unnecessary files via .dockerignore)
-COPY apps/frontend ./apps/frontend
+# 3. Copy all frontend app files
+COPY apps/frontend/ ./apps/frontend/
 
-# Set working directory to backend app
+# Set working directory to frontend app
 WORKDIR /app/apps/frontend
 
 # Expose port
 EXPOSE ${PORT}
 ENV PORT=${PORT}
-CMD ["bun", "run", "dev", "--host", "0.0.0.0"]
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
