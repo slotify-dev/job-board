@@ -4,6 +4,7 @@ import { useJobs } from '../hooks/useJobs';
 import { JobCard } from '../components/JobCard';
 import { JobFilters } from '../components/JobFilters';
 import { Pagination } from '../components/Pagination';
+import { Layout } from '../../../shared/components/layout';
 import type { JobListQuery } from '../types/job.types';
 
 export const HomePage = () => {
@@ -37,28 +38,30 @@ export const HomePage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-primary-50 flex items-center justify-center">
-        <div className="card max-w-md mx-auto text-center">
-          <h1 className="text-2xl font-bold text-black mb-4">
-            Error Loading Jobs
-          </h1>
-          <p className="text-primary-600 mb-4">
-            We&apos;re having trouble loading job listings. Please try again
-            later.
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="btn-primary"
-          >
-            Retry
-          </button>
+      <Layout>
+        <div className="flex items-center justify-center py-20">
+          <div className="card max-w-md mx-auto text-center">
+            <h1 className="text-2xl font-bold text-black mb-4">
+              Error Loading Jobs
+            </h1>
+            <p className="text-primary-600 mb-4">
+              We&apos;re having trouble loading job listings. Please try again
+              later.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="btn-primary"
+            >
+              Retry
+            </button>
+          </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-primary-50">
+    <Layout>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -138,6 +141,6 @@ export const HomePage = () => {
           </div>
         )}
       </div>
-    </div>
+    </Layout>
   );
 };

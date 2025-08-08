@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useJob } from '../hooks/useJobs';
 import { useAuth } from '../../auth/hooks/useAuth';
+import { Layout } from '../../../shared/components/layout';
 
 export const JobDetailsPage = () => {
   const { uuid } = useParams<{ uuid: string }>();
@@ -34,36 +35,42 @@ export const JobDetailsPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-primary-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="loading-spinner mx-auto mb-4"></div>
-          <p className="text-primary-600">Loading job details...</p>
+      <Layout>
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="loading-spinner mx-auto mb-4"></div>
+            <p className="text-primary-600">Loading job details...</p>
+          </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   if (error || !data?.success || !data?.job) {
     return (
-      <div className="min-h-screen bg-primary-50 flex items-center justify-center">
-        <div className="card max-w-md mx-auto text-center">
-          <h1 className="text-2xl font-bold text-black mb-4">Job Not Found</h1>
-          <p className="text-primary-600 mb-4">
-            The job you&apos;re looking for doesn&apos;t exist or is no longer
-            available.
-          </p>
-          <button onClick={() => navigate('/')} className="btn-primary">
-            Browse All Jobs
-          </button>
+      <Layout>
+        <div className="flex items-center justify-center py-20">
+          <div className="card max-w-md mx-auto text-center">
+            <h1 className="text-2xl font-bold text-black mb-4">
+              Job Not Found
+            </h1>
+            <p className="text-primary-600 mb-4">
+              The job you&apos;re looking for doesn&apos;t exist or is no longer
+              available.
+            </p>
+            <button onClick={() => navigate('/')} className="btn-primary">
+              Browse All Jobs
+            </button>
+          </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   const { job } = data;
 
   return (
-    <div className="min-h-screen bg-primary-50">
+    <Layout>
       <div className="container mx-auto px-4 py-8">
         {/* Back Button */}
         <button
@@ -176,6 +183,6 @@ export const JobDetailsPage = () => {
           </div>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 };
