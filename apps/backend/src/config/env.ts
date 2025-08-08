@@ -13,6 +13,22 @@ const envSchema = z.object({
     .default('3000'),
   API_VERSION: z.string().default('v1'),
   JWT_SECRET: z.string().min(1, 'JWT_SECRET is required'),
+  // Redis Configuration
+  REDIS_HOST: z.string().default('localhost'),
+  REDIS_PORT: z
+    .string()
+    .transform((val) => parseInt(val, 10))
+    .default('6379'),
+  REDIS_PASSWORD: z.string().optional(),
+  // Rate Limiting Configuration
+  RATE_LIMIT_WINDOW_MS: z
+    .string()
+    .transform((val) => parseInt(val, 10))
+    .default('60000'), // 1 minute
+  RATE_LIMIT_MAX_REQUESTS: z
+    .string()
+    .transform((val) => parseInt(val, 10))
+    .default('100'),
 });
 
 type Environment = z.infer<typeof envSchema>;

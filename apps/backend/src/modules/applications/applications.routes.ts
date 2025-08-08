@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { ApplicationsController } from './applications.controller';
-import { authMiddleware, requireRole } from '../../middleware/authMiddleware';
-import {
-  validateRequest,
-  validateParams,
-} from '../../middleware/validationMiddleware';
+import authMiddleware from '../../middleware/auth';
+import requireRole from '../../middleware/requireRole';
+import validateRequest from '../../middleware/validateRequest';
+import validateParams from '../../middleware/validateParams';
 import { createApplicationSchema, jobParamsSchema } from './applications.types';
+import { jobApplicationRateLimit } from '../../middleware/rateLimiters';
 
 const router = Router();
 const applicationsController = new ApplicationsController();
@@ -16,6 +16,7 @@ router.use(authMiddleware);
 router.post(
   '/jobs/:uuid/apply',
   requireRole(['job_seeker']),
+  jobApplicationRateLimit,
   validateParams(jobParamsSchema),
   validateRequest(createApplicationSchema),
   applicationsController.applyToJob.bind(applicationsController),

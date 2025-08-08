@@ -15,7 +15,7 @@ declare module 'express-serve-static-core' {
   }
 }
 
-export async function authMiddleware(
+async function authMiddleware(
   req: Request,
   res: Response,
   next: NextFunction,
@@ -56,18 +56,4 @@ export async function authMiddleware(
   }
 }
 
-export function requireRole(allowedRoles: string[]) {
-  return (req: Request, res: Response, next: NextFunction): void => {
-    if (!req.user) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
-    }
-
-    if (!allowedRoles.includes(req.user.role)) {
-      res.status(403).json({ error: 'Forbidden: Insufficient permissions' });
-      return;
-    }
-
-    next();
-  };
-}
+export default authMiddleware;

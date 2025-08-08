@@ -8,7 +8,7 @@ import {
 } from './auth.types';
 
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import UserRepository from '../../database/repository/user';
 
 export class AuthController {
@@ -26,7 +26,9 @@ export class AuthController {
         email: req.body.email,
       });
 
-      const token = jwt.sign({ userId: newUser.id }, authConfig.jwtSecret);
+      const token = jwt.sign({ userId: newUser.id }, authConfig.jwtSecret, {
+        expiresIn: authConfig.jwtExpiresIn,
+      } as SignOptions);
       res.cookie(authConfig.cookieName, token, authConfig.cookieOptions);
 
       return res.status(201).json({
@@ -61,7 +63,9 @@ export class AuthController {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
 
-      const token = jwt.sign({ userId: user.id }, authConfig.jwtSecret);
+      const token = jwt.sign({ userId: user.id }, authConfig.jwtSecret, {
+        expiresIn: authConfig.jwtExpiresIn,
+      } as SignOptions);
       res.cookie(authConfig.cookieName, token, authConfig.cookieOptions);
 
       return res.json({
@@ -119,7 +123,9 @@ export class AuthController {
           .json({ error: 'Failed to create or update user' });
       }
 
-      const token = jwt.sign({ userId: user.id }, authConfig.jwtSecret);
+      const token = jwt.sign({ userId: user.id }, authConfig.jwtSecret, {
+        expiresIn: authConfig.jwtExpiresIn,
+      } as SignOptions);
       res.cookie(authConfig.cookieName, token, authConfig.cookieOptions);
 
       return res.json({

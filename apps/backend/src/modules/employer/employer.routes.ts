@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import { EmployerController } from './employer.controller';
-import { authMiddleware, requireRole } from '../../middleware/authMiddleware';
-import {
-  validateRequest,
-  validateParams,
-} from '../../middleware/validationMiddleware';
+import authMiddleware from '../../middleware/auth';
+import requireRole from '../../middleware/requireRole';
+import validateRequest from '../../middleware/validateRequest';
+import validateParams from '../../middleware/validateParams';
+import { jobPostingRateLimit } from '../../middleware/rateLimiters';
 import {
   createJobSchema,
   updateJobSchema,
@@ -22,6 +22,7 @@ router.use(requireRole(['employer']));
 // Employer job management routes (employer role required)
 router.post(
   '/jobs',
+  jobPostingRateLimit,
   validateRequest(createJobSchema),
   employerController.createJob.bind(employerController),
 );

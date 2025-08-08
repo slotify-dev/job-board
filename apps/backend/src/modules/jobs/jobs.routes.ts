@@ -1,9 +1,7 @@
 import { Router } from 'express';
 import { JobsController } from './jobs.controller';
-import {
-  validateQuery,
-  validateParams,
-} from '../../middleware/validationMiddleware';
+import validateQuery from '../../middleware/validateQuery';
+import validateParams from '../../middleware/validateParams';
 import { jobListQuerySchema, jobParamsSchema } from './jobs.types';
 
 const router = Router();

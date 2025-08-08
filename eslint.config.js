@@ -10,9 +10,9 @@ export default [
   {
     ignores: [
       'eslint.config.js',
-      'node_modules/**',
-      'dist/**',
-      'build/**',
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/build/**',
       '.next/**',
       'coverage/**',
     ],
@@ -20,7 +20,6 @@ export default [
   js.configs.recommended,
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
-    ignores: ['eslint.config.js', 'node_modules/**', 'dist/**', 'build/**'],
     languageOptions: {
       parser: typescriptParser,
       ecmaVersion: 2022,
