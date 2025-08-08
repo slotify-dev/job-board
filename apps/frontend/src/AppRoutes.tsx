@@ -18,6 +18,7 @@ import { EmployerDashboard } from './modules/employer/components/EmployerDashboa
 // Job Browsing Components
 import { HomePage } from './modules/job-browsing/pages/HomePage';
 import { JobDetailsPage } from './modules/job-browsing/pages/JobDetailsPage';
+import { MyApplicationsPage } from './modules/job-browsing/pages/MyApplicationsPage';
 
 export function AppRoutes() {
   const { isAuthenticated, isNewAuth0User, isInitialized } = useAuth();
@@ -67,6 +68,16 @@ export function AppRoutes() {
           ) : (
             <Navigate to="/auth/login" replace />
           )
+        }
+      />
+
+      {/* Protected Job Seeker Routes */}
+      <Route
+        path="/my-applications"
+        element={
+          <ProtectedRoute roles={['job_seeker']}>
+            <MyApplicationsPage />
+          </ProtectedRoute>
         }
       />
 

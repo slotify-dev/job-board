@@ -1,12 +1,15 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useJob } from '../hooks/useJobs';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { Layout } from '../../../shared/components/layout';
+import { JobApplicationModal } from '../components/JobApplicationModal';
 
 export const JobDetailsPage = () => {
   const { uuid } = useParams<{ uuid: string }>();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
+  const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
 
   const { data, isLoading, error } = useJob(uuid!);
 
@@ -29,8 +32,11 @@ export const JobDetailsPage = () => {
       return;
     }
 
-    // TODO: Implement apply functionality
-    window.alert('Apply functionality will be implemented soon!');
+    setIsApplicationModalOpen(true);
+  };
+
+  const handleApplicationSuccess = () => {
+    window.alert('Application submitted successfully!');
   };
 
   if (isLoading) {
@@ -183,6 +189,18 @@ export const JobDetailsPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Job Application Modal */}
+      {data?.job && (
+        <JobApplicationModal
+          jobUuid={data.job.uuid}
+          jobTitle={data.job.title}
+          companyName={data.job.companyName || 'Company'}
+          isOpen={isApplicationModalOpen}
+          onClose={() => setIsApplicationModalOpen(false)}
+          onSuccess={handleApplicationSuccess}
+        />
+      )}
     </Layout>
   );
 };

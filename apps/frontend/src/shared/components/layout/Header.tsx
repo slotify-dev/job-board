@@ -93,6 +93,15 @@ export const Header = () => {
                         >
                           Dashboard
                         </Link>
+                        {user?.role === 'job_seeker' && (
+                          <Link
+                            to="/my-applications"
+                            className="block px-4 py-2 text-sm text-primary-700 hover:bg-primary-50 transition-colors"
+                            onClick={() => setIsMenuOpen(false)}
+                          >
+                            My Applications
+                          </Link>
+                        )}
                         <Link
                           to="/me/profile"
                           className="block px-4 py-2 text-sm text-primary-700 hover:bg-primary-50 transition-colors"
