@@ -33,11 +33,6 @@ export function EmployerProfilePage() {
   };
 
   const handleCancel = () => {
-    if (!profile) {
-      // If there's no existing profile, don't allow cancel
-      toast.error('Please create your company profile to continue');
-      return;
-    }
     setIsEditing(false);
   };
 
