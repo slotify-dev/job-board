@@ -1,6 +1,6 @@
+import type { UpdateJobSeekerProfileRequest } from '../types/profile.types';
 import React, { useState, useEffect } from 'react';
 import { useProfile } from '../hooks/useProfile';
-import { UpdateJobSeekerProfileRequest } from '../types/profile.types';
 import { toast } from 'sonner';
 
 // Using File from DOM lib types

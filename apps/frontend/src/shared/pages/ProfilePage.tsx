@@ -1,6 +1,6 @@
 import { useAppSelector } from '../store/store';
-import { ProfilePageComplete } from '../../modules/jobSeeker/pages/ProfilePageComplete';
 import { EmployerProfilePage } from '../../modules/employer/pages/EmployerProfilePage';
+import { ProfilePage as ProfilePageSimple } from '../../modules/jobSeeker/pages/ProfilePage';
 
 export function ProfilePage() {
   const { user } = useAppSelector((state) => state.auth);
@@ -10,7 +10,7 @@ export function ProfilePage() {
   }
 
   if (user.role === 'job_seeker') {
-    return <ProfilePageComplete />;
+    return <ProfilePageSimple />;
   }
 
   if (user.role === 'employer') {

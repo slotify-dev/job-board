@@ -1,5 +1,5 @@
 import { useProfile } from '../hooks/useProfile';
-import { JobSeekerProfile } from '../types/profile.types';
+import type { JobSeekerProfile } from '../types/profile.types';
 
 interface ProfileViewProps {
   onEditClick: () => void;

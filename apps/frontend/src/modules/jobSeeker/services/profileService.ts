@@ -1,7 +1,7 @@
-import {
+import type {
   JobSeekerProfile,
-  UpdateJobSeekerProfileRequest,
   ProfileResponse,
+  UpdateJobSeekerProfileRequest,
 } from '../types/profile.types';
 
 const API_BASE_URL =

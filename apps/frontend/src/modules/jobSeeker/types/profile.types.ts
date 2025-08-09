@@ -1,11 +1,11 @@
 export interface JobSeekerProfile {
+  email: string;
   userId: number;
   fullName: string;
-  email: string;
+  createdAt: Date;
   phone: string | null;
   address: string | null;
   resumeUrl: string | null;
-  createdAt: Date;
 }
 
 export interface UpdateJobSeekerProfileRequest {
@@ -18,6 +18,6 @@ export interface UpdateJobSeekerProfileRequest {
 
 export interface ProfileResponse {
   success: boolean;
-  profile?: JobSeekerProfile;
   userRole?: 'job_seeker';
+  profile?: JobSeekerProfile;
 }

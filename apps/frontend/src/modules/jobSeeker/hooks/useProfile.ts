@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { profileService } from '../services/profileService';
-import {
+
+import type {
   JobSeekerProfile,
   UpdateJobSeekerProfileRequest,
 } from '../types/profile.types';
