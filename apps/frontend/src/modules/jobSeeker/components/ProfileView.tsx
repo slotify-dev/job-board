@@ -100,16 +100,32 @@ export function ProfileView({ onEditClick }: ProfileViewProps) {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-primary-700 mb-1">
-                Contact Information
+                Email
               </label>
-              {profile.contactInfo ? (
-                <div className="text-primary-600 whitespace-pre-wrap">
-                  {profile.contactInfo}
-                </div>
+              <p className="text-primary-600">{profile.email}</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-primary-700 mb-1">
+                Phone
+              </label>
+              {profile.phone ? (
+                <p className="text-primary-600">{profile.phone}</p>
               ) : (
                 <p className="text-primary-400 italic">
-                  No contact info provided
+                  No phone number provided
                 </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-primary-700 mb-1">
+                Address
+              </label>
+              {profile.address ? (
+                <p className="text-primary-600">{profile.address}</p>
+              ) : (
+                <p className="text-primary-400 italic">No address provided</p>
               )}
             </div>
 
@@ -170,8 +186,18 @@ function ProfileCompletionStatus({ profile }: ProfileCompletionStatusProps) {
       required: true,
     },
     {
-      label: 'Contact Information',
-      completed: !!profile.contactInfo,
+      label: 'Email',
+      completed: !!profile.email,
+      required: true,
+    },
+    {
+      label: 'Phone',
+      completed: !!profile.phone,
+      required: false,
+    },
+    {
+      label: 'Address',
+      completed: !!profile.address,
       required: false,
     },
     {

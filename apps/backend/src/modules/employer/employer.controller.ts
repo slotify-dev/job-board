@@ -20,19 +20,12 @@ export class EmployerController {
     res: Response<JobResponse>,
   ) {
     try {
-      console.log(
-        'CreateJob called with body:',
-        JSON.stringify(req.body, null, 2),
-      );
-
       if (!req.user || req.user.role !== 'employer') {
-        console.log('Authorization failed: user not employer');
         return res.status(403).json({ success: false });
       }
 
       const employer = await EmployerRepository.findByUserId(req.user.id);
       if (!employer) {
-        console.log('Employer not found for user:', req.user.id);
         return res.status(400).json({ success: false });
       }
 

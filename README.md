@@ -65,6 +65,23 @@ docker-compose down
 docker-compose up --build
 ```
 
+## 🗃️ Database Setup & Seeding
+
+### Quick Database Seeding
+
+After starting the Docker containers, seed the database with realistic test data:
+
+```bash
+# Seed database with 25 employers, 50 job seekers, 50 jobs, and applications
+docker exec job-board-backend bun src/database/seed.ts
+```
+
+**Test Login Credentials:**
+
+- **Employers**: `employer1@example.com` to `employer25@example.com`
+- **Job Seekers**: `jobseeker1@example.com` to `jobseeker50@example.com`
+- **Password**: `Password123!` (for all accounts)
+
 ## Common Issues & Fixes
 
 ### Port Conflicts

@@ -1,14 +1,18 @@
 export interface JobSeekerProfile {
   userId: number;
   fullName: string;
-  contactInfo: string | null;
+  email: string;
+  phone: string | null;
+  address: string | null;
   resumeUrl: string | null;
   createdAt: Date;
 }
 
 export interface UpdateJobSeekerProfileRequest {
   fullName?: string;
-  contactInfo?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
   resumeUrl?: string;
 }
 

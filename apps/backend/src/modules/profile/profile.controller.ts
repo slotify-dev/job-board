@@ -62,13 +62,15 @@ export class ProfileController {
         let profile = await JobSeekerRepository.findByUserId(userId);
 
         if (!profile) {
-          if (!updates.fullName) {
+          if (!updates.fullName || !updates.email) {
             return res.status(400).json({ success: false });
           }
           profile = await JobSeekerRepository.create({
             userId,
             fullName: updates.fullName,
-            contactInfo: updates.contactInfo || null,
+            email: updates.email,
+            phone: updates.phone || null,
+            address: updates.address || null,
             resumeUrl: updates.resumeUrl || null,
           });
         } else {

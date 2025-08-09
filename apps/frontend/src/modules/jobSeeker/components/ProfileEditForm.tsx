@@ -3,6 +3,8 @@ import { useProfile } from '../hooks/useProfile';
 import { UpdateJobSeekerProfileRequest } from '../types/profile.types';
 import { toast } from 'sonner';
 
+// Using File from DOM lib types
+
 interface ProfileEditFormProps {
   onCancel: () => void;
   onSaved: () => void;
@@ -12,17 +14,23 @@ export function ProfileEditForm({ onCancel, onSaved }: ProfileEditFormProps) {
   const { profile, updateProfile, loading } = useProfile();
   const [formData, setFormData] = useState<UpdateJobSeekerProfileRequest>({
     fullName: '',
-    contactInfo: '',
+    email: '',
+    phone: '',
+    address: '',
     resumeUrl: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  // eslint-disable-next-line no-undef
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (profile) {
       setFormData({
         fullName: profile.fullName || '',
-        contactInfo: profile.contactInfo || '',
+        email: profile.email || '',
+        phone: profile.phone || '',
+        address: profile.address || '',
         resumeUrl: profile.resumeUrl || '',
       });
     }
@@ -37,9 +45,18 @@ export function ProfileEditForm({ onCancel, onSaved }: ProfileEditFormProps) {
       newErrors.fullName = 'Full name must be less than 255 characters';
     }
 
-    if (formData.contactInfo && formData.contactInfo.length > 1000) {
-      newErrors.contactInfo =
-        'Contact information must be less than 1000 characters';
+    if (!formData.email?.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    if (formData.phone && formData.phone.length > 50) {
+      newErrors.phone = 'Phone number must be less than 50 characters';
+    }
+
+    if (formData.address && formData.address.length > 1000) {
+      newErrors.address = 'Address must be less than 1000 characters';
     }
 
     if (formData.resumeUrl) {
@@ -94,6 +111,48 @@ export function ProfileEditForm({ onCancel, onSaved }: ProfileEditFormProps) {
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setSelectedFile(null);
+      return;
+    }
+
+    // Validate file size (5MB limit)
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    if (file.size > maxSize) {
+      setErrors((prev) => ({
+        ...prev,
+        resumeFile: 'File size must be less than 5MB',
+      }));
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      setErrors((prev) => ({
+        ...prev,
+        resumeFile: 'Please upload a PDF, DOC, or DOCX file',
+      }));
+      return;
+    }
+
+    setSelectedFile(file);
+    // Clear resume URL when file is selected
+    setFormData((prev) => ({ ...prev, resumeUrl: '' }));
+    // Clear any previous errors
+    setErrors((prev) => ({
+      ...prev,
+      resumeFile: '',
+      resumeUrl: '',
+    }));
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-64">
@@ -104,87 +163,162 @@ export function ProfileEditForm({ onCancel, onSaved }: ProfileEditFormProps) {
 
   return (
     <div className="card">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-black">
-          {profile ? 'Edit Profile' : 'Create Profile'}
-        </h2>
-        <button onClick={onCancel} className="btn-secondary">
-          Cancel
-        </button>
-      </div>
+      <h2 className="text-xl font-semibold text-black mb-6">
+        {profile ? 'Edit Your Profile' : 'Create Your Profile'}
+      </h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Full Name */}
+        {/* Personal Information */}
         <div>
-          <label
-            htmlFor="fullName"
-            className="block text-sm font-medium text-primary-700 mb-2"
-          >
-            Full Name *
-          </label>
-          <input
-            type="text"
-            id="fullName"
-            name="fullName"
-            value={formData.fullName}
-            onChange={handleInputChange}
-            className={`input ${errors.fullName ? 'border-red-500' : ''}`}
-            placeholder="Enter your full name"
-            required
-          />
-          {errors.fullName && (
-            <p className="mt-1 text-sm text-red-500">{errors.fullName}</p>
-          )}
+          <h3 className="text-lg font-medium text-black mb-3">
+            Personal Information
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-primary-700 mb-2">
+                Full Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="fullName"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleInputChange}
+                className={`input-field ${errors.fullName ? 'border-red-500' : ''}`}
+                placeholder="Enter your full name"
+                required
+                disabled={isSubmitting}
+              />
+              {errors.fullName && (
+                <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-primary-700 mb-2">
+                Email Address <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className={`input-field ${errors.email ? 'border-red-500' : ''}`}
+                placeholder="Enter your email address"
+                required
+                disabled={isSubmitting}
+              />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Contact Information */}
         <div>
-          <label
-            htmlFor="contactInfo"
-            className="block text-sm font-medium text-primary-700 mb-2"
-          >
+          <h3 className="text-lg font-medium text-black mb-3">
             Contact Information
-          </label>
-          <textarea
-            id="contactInfo"
-            name="contactInfo"
-            value={formData.contactInfo}
-            onChange={handleInputChange}
-            rows={4}
-            className={`input ${errors.contactInfo ? 'border-red-500' : ''}`}
-            placeholder="Phone number, address, or other contact details..."
-          />
-          <p className="mt-1 text-sm text-primary-500">
-            Add your phone number, address, or other contact information
-          </p>
-          {errors.contactInfo && (
-            <p className="mt-1 text-sm text-red-500">{errors.contactInfo}</p>
-          )}
-        </div>
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-primary-700 mb-2">
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleInputChange}
+                className={`input-field ${errors.phone ? 'border-red-500' : ''}`}
+                placeholder="+1 (555) 123-4567"
+                disabled={isSubmitting}
+              />
+              {errors.phone && (
+                <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+              )}
+            </div>
 
-        {/* Resume URL */}
-        <div>
-          <label
-            htmlFor="resumeUrl"
-            className="block text-sm font-medium text-primary-700 mb-2"
-          >
-            Resume URL
-          </label>
-          <input
-            type="url"
-            id="resumeUrl"
-            name="resumeUrl"
-            value={formData.resumeUrl}
-            onChange={handleInputChange}
-            className={`input ${errors.resumeUrl ? 'border-red-500' : ''}`}
-            placeholder="https://drive.google.com/..."
-          />
-          <p className="mt-1 text-sm text-primary-500">
-            Link to your resume (Google Drive, Dropbox, personal website, etc.)
-          </p>
-          {errors.resumeUrl && (
-            <p className="mt-1 text-sm text-red-500">{errors.resumeUrl}</p>
-          )}
+            <div>
+              <label className="block text-sm font-medium text-primary-700 mb-2">
+                Resume
+              </label>
+              <div className="space-y-3">
+                {/* File Upload */}
+                <div>
+                  <input
+                    type="file"
+                    id="resumeFile"
+                    accept=".pdf,.doc,.docx"
+                    onChange={handleFileChange}
+                    className="input-field"
+                    disabled={isSubmitting}
+                  />
+                  <p className="text-primary-500 text-sm mt-1">
+                    Upload your resume as PDF, DOC, or DOCX (max 5MB)
+                  </p>
+                  {selectedFile && (
+                    <p className="text-green-600 text-sm mt-1">
+                      Selected: {selectedFile.name}
+                    </p>
+                  )}
+                  {errors.resumeFile && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.resumeFile}
+                    </p>
+                  )}
+                </div>
+
+                {/* OR divider */}
+                <div className="flex items-center">
+                  <div className="flex-1 border-t border-primary-200"></div>
+                  <span className="px-3 text-sm text-primary-500">OR</span>
+                  <div className="flex-1 border-t border-primary-200"></div>
+                </div>
+
+                {/* URL Input */}
+                <div>
+                  <input
+                    type="url"
+                    id="resumeUrl"
+                    name="resumeUrl"
+                    value={formData.resumeUrl}
+                    onChange={handleInputChange}
+                    className={`input-field ${errors.resumeUrl ? 'border-red-500' : ''}`}
+                    placeholder="https://drive.google.com/..."
+                    disabled={isSubmitting}
+                  />
+                  <p className="text-primary-500 text-sm mt-1">
+                    Link to your resume (Google Drive, Dropbox, etc.)
+                  </p>
+                </div>
+              </div>
+              {errors.resumeUrl && (
+                <p className="text-red-500 text-sm mt-1">{errors.resumeUrl}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-primary-700 mb-2">
+              Address
+            </label>
+            <textarea
+              id="address"
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+              rows={3}
+              className={`input-field ${errors.address ? 'border-red-500' : ''}`}
+              placeholder="123 Main St, City, State 12345"
+              disabled={isSubmitting}
+            />
+            {errors.address && (
+              <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+            )}
+          </div>
         </div>
 
         {/* Action Buttons */}

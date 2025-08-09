@@ -93,6 +93,70 @@ Type checking:
 bun run typecheck
 ```
 
+## 🗃️ Database Setup & Seeding
+
+### Database Migrations
+
+The project uses Drizzle ORM for database management with PostgreSQL.
+
+**In Docker Environment (Recommended):**
+
+```bash
+# Run migrations inside backend container
+docker exec job-board-backend bun run db:push
+
+# Alternative: Run specific migration files directly
+docker exec job-board-postgres psql -U jobboard_user -d jobboard -f /tmp/migration.sql
+```
+
+**Local Development:**
+
+```bash
+# Push schema changes to database
+PG_HOST=localhost bun run db:push
+
+# Generate new migrations (when you change models)
+PG_HOST=localhost bun run db:generate
+
+# Run migrations manually
+PG_HOST=localhost bun run db:migrate
+```
+
+### Database Seeding for Local Development
+
+The project includes a comprehensive seeding script that creates realistic test data for development and testing.
+
+**Seed Data Overview:**
+
+- **25 Employers** with realistic company profiles and contact information
+- **50 Job Seekers** with complete profiles, contact details, and resume URLs
+- **50 Jobs** with rich block editor descriptions distributed across employers
+- **100-200 Applications** with realistic status distributions (pending, reviewed, accepted, rejected)
+- **Proper Foreign Key Relations** between all entities
+
+**Run Seeding (Docker - Recommended):**
+
+```bash
+# Seed database with comprehensive test data
+docker exec job-board-backend bun src/database/seed.ts
+```
+
+**Test Credentials After Seeding:**
+
+- **Employers**: `employer1@example.com` to `employer25@example.com`
+- **Job Seekers**: `jobseeker1@example.com` to `jobseeker50@example.com`
+- **Password**: `Password123!` (for all test accounts)
+
+**Seed Script Features:**
+
+- **Clears existing data** before seeding (safe reset)
+- **Realistic company names** (TechFlow Systems, DataForge Labs, etc.)
+- **Diverse job titles** (Senior Software Engineer, DevOps Engineer, Data Scientist, etc.)
+- **Geographic diversity** in job locations (San Francisco, Remote, Hybrid options)
+- **Rich job descriptions** using block editor format with proper JSON structure
+- **Weighted application statuses** for realistic distribution
+- **Proper error handling** and transaction safety
+
 ## 📡 API Endpoints
 
 ### Health & Status

@@ -12,7 +12,9 @@ export const jobSeekers = pgTable('job_seekers', {
     .primaryKey()
     .references(() => users.id),
   fullName: varchar('full_name', { length: 255 }).notNull(),
-  contactInfo: text('contact_info'),
+  email: varchar('email', { length: 255 }).notNull(),
+  phone: varchar('phone', { length: 50 }),
+  address: text('address'),
   resumeUrl: text('resume_url'),
   // Add other job seeker specific fields
   createdAt: timestamp('created_at').notNull().defaultNow(),

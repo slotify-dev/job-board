@@ -2,7 +2,9 @@ import { z } from 'zod';
 
 export const updateJobSeekerProfileSchema = z.object({
   fullName: z.string().min(1).max(255).optional(),
-  contactInfo: z.string().max(1000).optional(),
+  email: z.string().email().max(255).optional(),
+  phone: z.string().max(50).optional(),
+  address: z.string().max(1000).optional(),
   resumeUrl: z.string().url().optional(),
 });
 
@@ -15,7 +17,9 @@ export const updateEmployerProfileSchema = z.object({
 export interface JobSeekerProfile {
   userId: number;
   fullName: string;
-  contactInfo: string | null;
+  email: string;
+  phone: string | null;
+  address: string | null;
   resumeUrl: string | null;
   createdAt: Date;
 }

@@ -11,6 +11,7 @@ import bcrypt from 'bcryptjs';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import UserRepository from '../../database/repository/user';
 import EmployerRepository from '../../database/repository/employer';
+import JobSeekerRepository from '../../database/repository/jobSeekers';
 
 export class AuthController {
   async register(req: Request<object, object, RegisterRequest>, res: Response) {
@@ -34,6 +35,16 @@ export class AuthController {
           companyName: `${req.body.firstName} ${req.body.lastName}'s Company`,
           contactPerson: `${req.body.firstName} ${req.body.lastName}`,
           companyWebsite: null,
+        });
+      } else if (req.body.role === 'job_seeker') {
+        // Auto-create job seeker profile
+        await JobSeekerRepository.create({
+          userId: newUser.id,
+          fullName: `${req.body.firstName} ${req.body.lastName}`,
+          email: req.body.email,
+          phone: null,
+          address: null,
+          resumeUrl: null,
         });
       }
 
