@@ -34,6 +34,7 @@ export class EmployerController {
         title: req.body.title,
         description: req.body.description,
         location: req.body.location || null,
+        requirements: req.body.requirements || null,
         status: req.body.status || 'active',
       });
 
@@ -45,6 +46,7 @@ export class EmployerController {
           title: job.title,
           description: job.description,
           location: job.location,
+          requirements: job.requirements,
           status: job.status,
           createdAt: job.createdAt,
         },
@@ -74,6 +76,7 @@ export class EmployerController {
           title: job.title,
           description: job.description,
           location: job.location,
+          requirements: job.requirements,
           status: job.status,
           createdAt: job.createdAt,
         })),
@@ -119,6 +122,7 @@ export class EmployerController {
           title: updatedJob.title,
           description: updatedJob.description,
           location: updatedJob.location,
+          requirements: updatedJob.requirements,
           status: updatedJob.status,
           createdAt: updatedJob.createdAt,
         },

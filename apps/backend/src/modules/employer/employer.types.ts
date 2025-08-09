@@ -4,6 +4,7 @@ export const createJobSchema = z.object({
   title: z.string().min(1).max(255),
   description: z.string().min(1),
   location: z.string().max(255).optional(),
+  requirements: z.string().optional(),
   status: z.enum(['active', 'draft']).default('active'),
 });
 
@@ -11,6 +12,7 @@ export const updateJobSchema = z.object({
   title: z.string().min(1).max(255).optional(),
   description: z.string().min(1).optional(),
   location: z.string().max(255).optional(),
+  requirements: z.string().optional(),
   status: z.enum(['active', 'closed', 'draft']).optional(),
 });
 
@@ -32,6 +34,7 @@ export interface EmployerJob {
   title: string;
   description: string;
   location: string | null;
+  requirements: string | null;
   status: string;
   createdAt: Date;
 }

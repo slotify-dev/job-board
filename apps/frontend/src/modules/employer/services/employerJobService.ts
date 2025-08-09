@@ -11,12 +11,11 @@ const API_BASE_URL =
 
 export const employerJobService = {
   async getMyJobs(): Promise<EmployerJobsResponse> {
-    const token = localStorage.getItem('token');
     const response = await fetch(`${API_BASE_URL}/employer/jobs`, {
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -27,13 +26,12 @@ export const employerJobService = {
   },
 
   async createJob(jobData: CreateJobRequest): Promise<CreateJobResponse> {
-    const token = localStorage.getItem('token');
     const response = await fetch(`${API_BASE_URL}/employer/jobs`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify(jobData),
     });
 
@@ -45,15 +43,14 @@ export const employerJobService = {
   },
 
   async updateJob(jobData: UpdateJobRequest): Promise<CreateJobResponse> {
-    const token = localStorage.getItem('token');
     const response = await fetch(
       `${API_BASE_URL}/employer/jobs/${jobData.uuid}`,
       {
         method: 'PUT',
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           title: jobData.title,
           description: jobData.description,
@@ -71,13 +68,12 @@ export const employerJobService = {
   },
 
   async deleteJob(uuid: string): Promise<{ success: boolean }> {
-    const token = localStorage.getItem('token');
     const response = await fetch(`${API_BASE_URL}/employer/jobs/${uuid}`, {
       method: 'DELETE',
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -90,12 +86,11 @@ export const employerJobService = {
   async getJobById(
     uuid: string,
   ): Promise<{ success: boolean; job?: EmployerJob }> {
-    const token = localStorage.getItem('token');
-    const response = await fetch(`${API_BASE_URL}/jobs/${uuid}`, {
+    const response = await fetch(`${API_BASE_URL}/employer/jobs/${uuid}`, {
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
     });
 
     if (!response.ok) {

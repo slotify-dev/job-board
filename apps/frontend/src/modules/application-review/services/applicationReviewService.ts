@@ -9,14 +9,13 @@ const API_BASE_URL =
 
 export const applicationReviewService = {
   async getJobApplications(jobUuid: string): Promise<JobApplicationsResponse> {
-    const token = localStorage.getItem('token');
     const response = await fetch(
       `${API_BASE_URL}/employer/jobs/${jobUuid}/applications`,
       {
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
       },
     );
 
@@ -31,15 +30,14 @@ export const applicationReviewService = {
     applicationUuid: string,
     statusData: UpdateApplicationStatusRequest,
   ): Promise<UpdateApplicationStatusResponse> {
-    const token = localStorage.getItem('token');
     const response = await fetch(
       `${API_BASE_URL}/employer/applications/${applicationUuid}`,
       {
         method: 'PATCH',
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(statusData),
       },
     );

@@ -17,6 +17,7 @@ export default [
       'coverage/**',
       '**/seed.ts',
       '**/*.sql',
+      '**/jest.config.js',
     ],
   },
   js.configs.recommended,
@@ -85,6 +86,27 @@ export default [
       },
     },
     rules: {
+      'react/prop-types': 'off',
+      'react/react-in-jsx-scope': 'off',
+      'react-hooks/rules-of-hooks': 'off',
+      'react-hooks/exhaustive-deps': 'off',
+    },
+  },
+  {
+    files: ['apps/backend/**/__tests__/**/*', 'apps/backend/**/*.test.*'],
+    languageOptions: {
+      globals: {
+        node: true,
+        browser: false,
+        console: 'readonly',
+        process: 'readonly',
+        jest: 'readonly',
+        global: 'readonly',
+        module: 'readonly',
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
       'react/prop-types': 'off',
       'react/react-in-jsx-scope': 'off',
       'react-hooks/rules-of-hooks': 'off',
