@@ -179,7 +179,6 @@ export class EmployerController {
       }
 
       const applications = await ApplicationRepository.findByJobId(job.id);
-
       return res.json({
         success: true,
         applications: applications.map((app) => ({
@@ -190,8 +189,11 @@ export class EmployerController {
           coverLetter: app.coverLetter,
           status: app.status,
           createdAt: app.createdAt,
-          jobSeekerName: app.jobSeekerName || 'Unknown Applicant',
-          jobSeekerContactInfo: app.jobSeekerContactInfo,
+          jobSeekerName: app.jobSeekerName,
+          jobSeekerEmail: app.jobSeekerEmail,
+          jobSeekerPhone: app.jobSeekerPhone,
+          jobSeekerAddress: app.jobSeekerAddress,
+          jobSeekerResumeUrl: app.jobSeekerResumeUrl,
         })),
       });
     } catch (error) {

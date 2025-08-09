@@ -171,9 +171,9 @@ export function JobApplicationsView() {
       {/* Applications Display */}
       {viewMode === 'table' ? (
         <ApplicationsTable
+          updatingId={updating}
           applications={filteredApplications}
           onStatusUpdate={updateApplicationStatus}
-          updatingId={updating}
         />
       ) : (
         <div className="space-y-4">
