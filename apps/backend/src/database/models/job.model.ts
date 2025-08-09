@@ -19,9 +19,9 @@ export const jobs = pgTable(
       .notNull()
       .references(() => employers.userId),
     title: varchar('title', { length: 255 }).notNull(),
-    description: json('description').notNull(), // Store block editor JSON content
+    description: json('description').notNull(),
     location: varchar('location', { length: 255 }),
-    status: varchar('status', { length: 20 }).notNull().default('active'), // 'active' | 'closed' | 'draft' | 'reviewing'
+    status: varchar('status', { length: 20 }).notNull().default('active'),
     createdAt: timestamp('created_at').notNull().defaultNow(),
   },
   (table) => ({
@@ -29,6 +29,14 @@ export const jobs = pgTable(
     statusIdx: index('jobs_status_idx').on(table.status),
     locationIdx: index('jobs_location_idx').on(table.location),
     createdAtIdx: index('jobs_created_at_idx').on(table.createdAt),
+    statusCreatedAtIdx: index('jobs_status_created_at_idx').on(
+      table.status,
+      table.createdAt,
+    ),
+    employerStatusIdx: index('jobs_employer_id_status_idx').on(
+      table.employerId,
+      table.status,
+    ),
   }),
 );
 

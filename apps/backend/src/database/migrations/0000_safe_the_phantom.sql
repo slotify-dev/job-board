@@ -12,18 +12,24 @@ CREATE TABLE "applications" (
 --> statement-breakpoint
 CREATE TABLE "employers" (
 	"user_id" integer PRIMARY KEY NOT NULL,
+	"uuid" uuid DEFAULT gen_random_uuid() NOT NULL,
 	"company_name" varchar(255) NOT NULL,
 	"contact_person" varchar(255) NOT NULL,
 	"company_website" text,
-	"created_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "employers_uuid_unique" UNIQUE("uuid")
 );
 --> statement-breakpoint
 CREATE TABLE "job_seekers" (
 	"user_id" integer PRIMARY KEY NOT NULL,
+	"uuid" uuid DEFAULT gen_random_uuid() NOT NULL,
 	"full_name" varchar(255) NOT NULL,
-	"contact_info" text,
+	"email" varchar(255) NOT NULL,
+	"phone" varchar(50),
+	"address" text,
 	"resume_url" text,
-	"created_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "job_seekers_uuid_unique" UNIQUE("uuid")
 );
 --> statement-breakpoint
 CREATE TABLE "jobs" (
@@ -31,7 +37,7 @@ CREATE TABLE "jobs" (
 	"uuid" uuid DEFAULT gen_random_uuid() NOT NULL,
 	"employer_id" integer NOT NULL,
 	"title" varchar(255) NOT NULL,
-	"description" text NOT NULL,
+	"description" json NOT NULL,
 	"location" varchar(255),
 	"status" varchar(20) DEFAULT 'active' NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -58,13 +64,24 @@ ALTER TABLE "job_seekers" ADD CONSTRAINT "job_seekers_user_id_users_id_fk" FOREI
 ALTER TABLE "jobs" ADD CONSTRAINT "jobs_employer_id_employers_user_id_fk" FOREIGN KEY ("employer_id") REFERENCES "public"."employers"("user_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "applications_job_id_idx" ON "applications" USING btree ("job_id");--> statement-breakpoint
 CREATE INDEX "applications_job_seeker_id_idx" ON "applications" USING btree ("job_seeker_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "applications_job_id_job_seeker_id_uniq" ON "applications" USING btree ("job_id","job_seeker_id");--> statement-breakpoint
 CREATE INDEX "applications_status_idx" ON "applications" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "applications_created_at_idx" ON "applications" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX "applications_status_created_at_idx" ON "applications" USING btree ("status","created_at");--> statement-breakpoint
+CREATE INDEX "employers_company_name_idx" ON "employers" USING btree ("company_name");--> statement-breakpoint
+CREATE INDEX "employers_contact_person_idx" ON "employers" USING btree ("contact_person");--> statement-breakpoint
+CREATE INDEX "employers_created_at_idx" ON "employers" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX "job_seekers_full_name_idx" ON "job_seekers" USING btree ("full_name");--> statement-breakpoint
+CREATE INDEX "job_seekers_email_idx" ON "job_seekers" USING btree ("email");--> statement-breakpoint
+CREATE INDEX "job_seekers_created_at_idx" ON "job_seekers" USING btree ("created_at");--> statement-breakpoint
 CREATE INDEX "jobs_employer_id_idx" ON "jobs" USING btree ("employer_id");--> statement-breakpoint
 CREATE INDEX "jobs_status_idx" ON "jobs" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "jobs_location_idx" ON "jobs" USING btree ("location");--> statement-breakpoint
 CREATE INDEX "jobs_created_at_idx" ON "jobs" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX "jobs_status_created_at_idx" ON "jobs" USING btree ("status","created_at");--> statement-breakpoint
+CREATE INDEX "jobs_employer_id_status_idx" ON "jobs" USING btree ("employer_id","status");--> statement-breakpoint
 CREATE INDEX "users_uuid_idx" ON "users" USING btree ("uuid");--> statement-breakpoint
 CREATE INDEX "users_email_idx" ON "users" USING btree ("email");--> statement-breakpoint
 CREATE INDEX "users_role_idx" ON "users" USING btree ("role");--> statement-breakpoint
-CREATE INDEX "users_sso_provider_sso_id_idx" ON "users" USING btree ("sso_provider","sso_id");
+CREATE INDEX "users_sso_provider_sso_id_idx" ON "users" USING btree ("sso_provider","sso_id");--> statement-breakpoint
+CREATE INDEX "users_role_created_at_idx" ON "users" USING btree ("role","created_at");

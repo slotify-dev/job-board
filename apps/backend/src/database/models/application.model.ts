@@ -7,6 +7,7 @@ import {
   varchar,
   timestamp,
   index,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
 import { jobs } from './job.model';
 import { jobSeekers } from './jobSeeker.model';
@@ -24,14 +25,21 @@ export const applications = pgTable(
       .references(() => jobSeekers.userId),
     resumeUrl: text('resume_url').notNull(),
     coverLetter: text('cover_letter'),
-    status: varchar('status', { length: 20 }).notNull().default('pending'), // 'pending' | 'reviewed' | 'rejected' | 'accepted'
+    status: varchar('status', { length: 20 }).notNull().default('pending'),
     createdAt: timestamp('created_at').notNull().defaultNow(),
   },
   (table) => ({
     jobIdx: index('applications_job_id_idx').on(table.jobId),
     jobSeekerIdx: index('applications_job_seeker_id_idx').on(table.jobSeekerId),
+    jobAndSeekerUnique: uniqueIndex(
+      'applications_job_id_job_seeker_id_uniq',
+    ).on(table.jobId, table.jobSeekerId),
     statusIdx: index('applications_status_idx').on(table.status),
     createdAtIdx: index('applications_created_at_idx').on(table.createdAt),
+    statusCreatedAtIdx: index('applications_status_created_at_idx').on(
+      table.status,
+      table.createdAt,
+    ),
   }),
 );
 

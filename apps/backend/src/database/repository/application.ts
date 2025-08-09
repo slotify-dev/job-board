@@ -15,11 +15,9 @@ export interface ApplicationWithJob extends Application {
 }
 
 export interface ApplicationWithJobSeeker extends Application {
+  jobSeekerUuid: number | null;
   jobSeekerName: string | null;
   jobSeekerEmail: string | null;
-  jobSeekerPhone: string | null;
-  jobSeekerAddress: string | null;
-  jobSeekerResumeUrl: string | null;
 }
 
 export default class ApplicationRepository {
@@ -81,9 +79,7 @@ export default class ApplicationRepository {
           createdAt: applications.createdAt,
           jobSeekerName: jobSeekers.fullName,
           jobSeekerEmail: jobSeekers.email,
-          jobSeekerPhone: jobSeekers.phone,
-          jobSeekerAddress: jobSeekers.address,
-          jobSeekerResumeUrl: jobSeekers.resumeUrl,
+          jobSeekerUuid: jobSeekers.userId,
         })
         .from(applications)
         .leftJoin(jobSeekers, eq(applications.jobSeekerId, jobSeekers.userId))

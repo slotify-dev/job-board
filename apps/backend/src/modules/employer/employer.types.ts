@@ -44,8 +44,11 @@ export interface JobApplicationWithSeeker {
   coverLetter: string | null;
   status: string;
   createdAt: Date;
-  jobSeekerName: string;
-  jobSeekerContactInfo: string | null;
+  applicant: {
+    name: string;
+    email: string;
+    uuid: string;
+  };
 }
 
 export interface EmployerJobsResponse {

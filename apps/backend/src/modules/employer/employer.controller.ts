@@ -189,11 +189,11 @@ export class EmployerController {
           coverLetter: app.coverLetter,
           status: app.status,
           createdAt: app.createdAt,
-          jobSeekerName: app.jobSeekerName,
-          jobSeekerEmail: app.jobSeekerEmail,
-          jobSeekerPhone: app.jobSeekerPhone,
-          jobSeekerAddress: app.jobSeekerAddress,
-          jobSeekerResumeUrl: app.jobSeekerResumeUrl,
+          applicant: {
+            uuid: app.jobSeekerUuid,
+            name: app.jobSeekerName,
+            email: app.jobSeekerEmail,
+          },
         })),
       });
     } catch (error) {
