@@ -25,6 +25,18 @@ export function ProfilePageBasic() {
               >
                 Dashboard
               </a>
+              <a
+                href="/"
+                className="text-primary-600 hover:text-black transition-colors"
+              >
+                Browse Jobs
+              </a>
+              <a
+                href="/my-applications"
+                className="text-primary-600 hover:text-black transition-colors"
+              >
+                My Applications
+              </a>
               <span className="text-black font-medium">Profile</span>
             </nav>
           </div>

@@ -1,48 +1,16 @@
-import { useAppSelector, useAppDispatch } from '../../../shared/store/store';
-import { logout } from '../../auth/store/authSlice';
-import { getUserDisplayName } from '../../auth/utils/authHelpers';
-import { toast } from 'sonner';
+import { useAppSelector } from '../../../shared/store/store';
+import { Layout } from '../../../shared/components/layout';
 
 export function JobSeekerDashboard() {
-  const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-
-  const handleLogout = () => {
-    dispatch(logout());
-    toast.success('Logged out successfully');
-  };
 
   if (!user) {
     return null;
   }
 
   return (
-    <div className="min-h-screen bg-primary-50">
-      {/* Header */}
-      <header className="bg-white border-b border-primary-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-bold text-black">Job Board</h1>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-primary-600">
-                Welcome, {getUserDisplayName(user)}
-              </span>
-              <button
-                onClick={handleLogout}
-                className="btn-secondary text-sm px-3 py-1"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <Layout>
+      <div className="container mx-auto px-4 py-8">
         {/* Welcome Section */}
         <div className="card mb-8">
           <div className="flex items-center justify-between">
@@ -67,7 +35,10 @@ export function JobSeekerDashboard() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="card hover:shadow-md transition-shadow cursor-pointer">
+          <a
+            href="/"
+            className="card hover:shadow-md transition-shadow cursor-pointer block"
+          >
             <div className="text-center">
               <div className="w-12 h-12 bg-black rounded-lg mx-auto mb-3 flex items-center justify-center">
                 <svg
@@ -89,9 +60,12 @@ export function JobSeekerDashboard() {
                 Discover new opportunities
               </p>
             </div>
-          </div>
+          </a>
 
-          <div className="card hover:shadow-md transition-shadow cursor-pointer">
+          <a
+            href="/my-applications"
+            className="card hover:shadow-md transition-shadow cursor-pointer block"
+          >
             <div className="text-center">
               <div className="w-12 h-12 bg-black rounded-lg mx-auto mb-3 flex items-center justify-center">
                 <svg
@@ -111,7 +85,7 @@ export function JobSeekerDashboard() {
               <h3 className="font-medium text-black mb-1">My Applications</h3>
               <p className="text-sm text-primary-600">Track your progress</p>
             </div>
-          </div>
+          </a>
 
           <a
             href="/profile"
@@ -168,7 +142,7 @@ export function JobSeekerDashboard() {
             </p>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </Layout>
   );
 }

@@ -14,7 +14,12 @@ export const Header = () => {
 
   const getUserDisplayName = () => {
     if (!user) return '';
-    return user.email || 'User';
+    if (user.firstName && user.lastName) {
+      return `${user.firstName} ${user.lastName}`;
+    }
+    if (user.firstName) return user.firstName;
+    if (user.lastName) return user.lastName;
+    return user.email?.split('@')[0] || 'User';
   };
 
   const getUserDashboardRoute = () => {
@@ -50,13 +55,6 @@ export const Header = () => {
 
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
-                <Link
-                  to={getUserDashboardRoute()}
-                  className="text-primary-600 hover:text-black transition-colors font-medium"
-                >
-                  Dashboard
-                </Link>
-
                 <div className="relative">
                   <button
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -103,7 +101,7 @@ export const Header = () => {
                           </Link>
                         )}
                         <Link
-                          to="/me/profile"
+                          to="/profile"
                           className="block px-4 py-2 text-sm text-primary-700 hover:bg-primary-50 transition-colors"
                           onClick={() => setIsMenuOpen(false)}
                         >
@@ -181,8 +179,17 @@ export const Header = () => {
                   >
                     Dashboard
                   </Link>
+                  {user?.role === 'job_seeker' && (
+                    <Link
+                      to="/my-applications"
+                      className="block text-primary-600 hover:text-black transition-colors font-medium py-2"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      My Applications
+                    </Link>
+                  )}
                   <Link
-                    to="/me/profile"
+                    to="/profile"
                     className="block text-primary-600 hover:text-black transition-colors font-medium py-2"
                     onClick={() => setIsMenuOpen(false)}
                   >
