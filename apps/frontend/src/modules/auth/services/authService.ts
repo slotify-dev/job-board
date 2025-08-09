@@ -89,6 +89,8 @@ class AuthService {
         body: JSON.stringify({
           email: userData.email,
           password: userData.password,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
           role: userData.role,
         }),
       });

@@ -3,6 +3,14 @@ import { z } from 'zod';
 export const registerSchema = z.object({
   role: z.enum(['job_seeker', 'employer']).default('job_seeker'),
   email: z.string().email('Please provide a valid email address').toLowerCase(),
+  firstName: z
+    .string()
+    .min(1, 'First name is required')
+    .max(50, 'First name must not exceed 50 characters'),
+  lastName: z
+    .string()
+    .min(1, 'Last name is required')
+    .max(50, 'Last name must not exceed 50 characters'),
   password: z
     .string()
     .min(8, 'Password must be at least 8 characters long')

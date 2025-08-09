@@ -31,7 +31,7 @@ export const createApp = (): Application => {
   );
 
   // make sure to limit payload
-  app.use(express.json({ limit: '1MB' }));
+  app.use(express.json({ limit: '5MB' }));
   app.use(express.urlencoded({ extended: true }));
 
   // TODO: use ssl in prod

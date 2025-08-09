@@ -8,12 +8,19 @@ const validateRequest = <T>(schema: z.ZodSchema<T>) => {
       next();
     } catch (error) {
       if (error instanceof ZodError) {
+        console.error('Validation failed for request:', {
+          url: req.url,
+          method: req.method,
+          body: req.body,
+          errors: error.flatten(),
+        });
         res.status(400).json({
           error: 'Validation failed',
           details: error.flatten(),
         });
         return;
       }
+      console.error('Internal server error in validation:', error);
       res.status(500).json({
         error: 'Internal server error',
       });

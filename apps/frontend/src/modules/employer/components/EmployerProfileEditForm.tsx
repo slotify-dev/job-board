@@ -105,7 +105,7 @@ export function EmployerProfileEditForm({
                 type="text"
                 value={formData.companyName || ''}
                 onChange={handleChange('companyName')}
-                className={`input ${errors.companyName ? 'border-red-500' : ''}`}
+                className={`input-field ${errors.companyName ? 'border-red-500' : ''}`}
                 placeholder="Enter your company name"
                 disabled={loading}
               />
@@ -124,7 +124,7 @@ export function EmployerProfileEditForm({
                 type="text"
                 value={formData.contactPerson || ''}
                 onChange={handleChange('contactPerson')}
-                className={`input ${errors.contactPerson ? 'border-red-500' : ''}`}
+                className={`input-field ${errors.contactPerson ? 'border-red-500' : ''}`}
                 placeholder="Enter contact person name"
                 disabled={loading}
               />
@@ -146,7 +146,7 @@ export function EmployerProfileEditForm({
             type="url"
             value={formData.companyWebsite || ''}
             onChange={handleChange('companyWebsite')}
-            className={`input ${errors.companyWebsite ? 'border-red-500' : ''}`}
+            className={`input-field ${errors.companyWebsite ? 'border-red-500' : ''}`}
             placeholder="https://www.company.com"
             disabled={loading}
           />

@@ -15,12 +15,7 @@ export function EmployerProfilePage() {
     fetchProfile();
   }, [fetchProfile]);
 
-  // If no profile exists, start in edit mode
-  useEffect(() => {
-    if (!loading && !profile && !error) {
-      setIsEditing(true);
-    }
-  }, [loading, profile, error]);
+  // Always start in readonly mode since profile is auto-created during signup
 
   const handleEdit = () => {
     setIsEditing(true);

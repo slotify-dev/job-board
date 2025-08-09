@@ -10,6 +10,7 @@ import {
 import bcrypt from 'bcryptjs';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import UserRepository from '../../database/repository/user';
+import EmployerRepository from '../../database/repository/employer';
 
 export class AuthController {
   async register(req: Request<object, object, RegisterRequest>, res: Response) {
@@ -25,6 +26,16 @@ export class AuthController {
         role: req.body.role,
         email: req.body.email,
       });
+
+      // Auto-create employer profile if user is an employer
+      if (req.body.role === 'employer') {
+        await EmployerRepository.create({
+          userId: newUser.id,
+          companyName: `${req.body.firstName} ${req.body.lastName}'s Company`,
+          contactPerson: `${req.body.firstName} ${req.body.lastName}`,
+          companyWebsite: null,
+        });
+      }
 
       const token = jwt.sign({ userId: newUser.id }, authConfig.jwtSecret, {
         expiresIn: authConfig.jwtExpiresIn,
@@ -114,6 +125,16 @@ export class AuthController {
             ssoProvider: req.body.provider,
             ssoId: req.body.ssoId,
           });
+
+          // Auto-create employer profile if user is an employer (OAuth signup)
+          if (req.body.role === 'employer') {
+            await EmployerRepository.create({
+              userId: user.id,
+              companyName: `${req.body.email.split('@')[0]}'s Company`,
+              contactPerson: req.body.email.split('@')[0],
+              companyWebsite: null,
+            });
+          }
         }
       }
 
