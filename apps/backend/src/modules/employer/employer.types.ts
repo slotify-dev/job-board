@@ -2,18 +2,16 @@ import { z } from 'zod';
 
 export const createJobSchema = z.object({
   title: z.string().min(1).max(255),
-  description: z.string().min(1),
+  description: z.any(), // JSON content from block editor
   location: z.string().max(255).optional(),
-  requirements: z.string().optional(),
-  status: z.enum(['active', 'draft']).default('active'),
+  status: z.enum(['active', 'draft', 'reviewing', 'closed']).default('active'),
 });
 
 export const updateJobSchema = z.object({
   title: z.string().min(1).max(255).optional(),
-  description: z.string().min(1).optional(),
+  description: z.any().optional(), // JSON content from block editor
   location: z.string().max(255).optional(),
-  requirements: z.string().optional(),
-  status: z.enum(['active', 'closed', 'draft']).optional(),
+  status: z.enum(['active', 'closed', 'draft', 'reviewing']).optional(),
 });
 
 export const updateApplicationStatusSchema = z.object({
@@ -32,9 +30,8 @@ export interface EmployerJob {
   id: number;
   uuid: string;
   title: string;
-  description: string;
+  description: Record<string, unknown>; // JSON content from block editor
   location: string | null;
-  requirements: string | null;
   status: string;
   createdAt: Date;
 }

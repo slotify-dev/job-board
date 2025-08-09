@@ -1,8 +1,10 @@
+import { EditorData, JobStatus } from '../../../shared/types/editorTypes';
+
 export interface CreateJobRequest {
   title: string;
-  description: string;
+  description: EditorData; // Block editor JSON data
   location?: string;
-  requirements?: string;
+  status?: JobStatus;
 }
 
 export interface UpdateJobRequest extends CreateJobRequest {
@@ -12,10 +14,9 @@ export interface UpdateJobRequest extends CreateJobRequest {
 export interface EmployerJob {
   uuid: string;
   title: string;
-  description: string;
+  description: EditorData; // Block editor JSON data
   location: string | null;
-  requirements: string | null;
-  status: 'active' | 'closed' | 'draft';
+  status: JobStatus;
   companyName: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -37,7 +38,7 @@ export interface CreateJobResponse {
 
 export interface JobFormData {
   title: string;
-  description: string;
+  description: EditorData; // Block editor JSON data
   location: string;
-  requirements: string;
+  status: JobStatus;
 }

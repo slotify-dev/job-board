@@ -1,52 +1,20 @@
 import { Link } from 'react-router-dom';
-import { useAppSelector, useAppDispatch } from '../../../shared/store/store';
-import { logout } from '../../auth/store/authSlice';
-import { getUserDisplayName } from '../../auth/utils/authHelpers';
+import { useAppSelector } from '../../../shared/store/store';
 import { useEmployerJobs } from '../hooks/useEmployerJobs';
 import { JobManagementTable } from './JobManagementTable';
-import { toast } from 'sonner';
+import { Layout } from '../../../shared/components/layout';
 
 export function EmployerDashboard() {
-  const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
   const { jobs, loading } = useEmployerJobs();
-
-  const handleLogout = () => {
-    dispatch(logout());
-    toast.success('Logged out successfully');
-  };
 
   if (!user) {
     return null;
   }
 
   return (
-    <div className="min-h-screen bg-primary-50">
-      {/* Header */}
-      <header className="bg-white border-b border-primary-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-bold text-black">Job Board</h1>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-primary-600">
-                Welcome, {getUserDisplayName(user)}
-              </span>
-              <button
-                onClick={handleLogout}
-                className="btn-secondary text-sm px-3 py-1"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <Layout>
+      <div className="container mx-auto px-4 py-8">
         {/* Welcome Section */}
         <div className="card mb-8">
           <div className="flex items-center justify-between">
@@ -100,7 +68,10 @@ export function EmployerDashboard() {
             </div>
           </Link>
 
-          <div className="card hover:shadow-md transition-shadow cursor-pointer">
+          <Link
+            to="/employer/dashboard"
+            className="card hover:shadow-md transition-shadow cursor-pointer block"
+          >
             <div className="text-center">
               <div className="w-12 h-12 bg-black rounded-lg mx-auto mb-3 flex items-center justify-center">
                 <svg
@@ -122,9 +93,12 @@ export function EmployerDashboard() {
                 {loading ? 'Loading...' : `${jobs.length} total jobs`}
               </p>
             </div>
-          </div>
+          </Link>
 
-          <div className="card hover:shadow-md transition-shadow cursor-pointer">
+          <Link
+            to="/employer/candidates"
+            className="card hover:shadow-md transition-shadow cursor-pointer block"
+          >
             <div className="text-center">
               <div className="w-12 h-12 bg-black rounded-lg mx-auto mb-3 flex items-center justify-center">
                 <svg
@@ -137,14 +111,14 @@ export function EmployerDashboard() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 715.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
                   />
                 </svg>
               </div>
               <h3 className="font-medium text-black mb-1">Candidates</h3>
               <p className="text-sm text-primary-600">Review applications</p>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* Stats Overview */}
@@ -194,7 +168,7 @@ export function EmployerDashboard() {
 
         {/* Job Management Section */}
         <JobManagementTable />
-      </main>
-    </div>
+      </div>
+    </Layout>
   );
 }

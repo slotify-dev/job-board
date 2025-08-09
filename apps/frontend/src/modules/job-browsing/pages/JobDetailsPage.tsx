@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useJob } from '../hooks/useJobs';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { Layout } from '../../../shared/components/layout';
+import { BlockRenderer } from '../../../shared/components/editor';
 import { JobApplicationModal } from '../components/JobApplicationModal';
 
 export const JobDetailsPage = () => {
@@ -115,8 +116,8 @@ export const JobDetailsPage = () => {
                 <h2 className="text-xl font-semibold text-black mb-4">
                   Job Description
                 </h2>
-                <div className="prose max-w-none text-primary-700">
-                  <p className="whitespace-pre-wrap">{job.description}</p>
+                <div className="prose max-w-none">
+                  <BlockRenderer data={job.description} />
                 </div>
               </div>
             </div>

@@ -1,33 +1,24 @@
 import { Link } from 'react-router-dom';
 import { JobApplicationsView } from '../components/JobApplicationsView';
+import { Layout } from '../../../shared/components/layout';
 
 export function ApplicationReviewPage() {
   return (
-    <div className="min-h-screen bg-primary-50">
-      {/* Header */}
-      <header className="bg-white border-b border-primary-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <Link
-                to="/employer/dashboard"
-                className="text-primary-600 hover:text-primary-800 font-medium"
-              >
-                ← Back to Dashboard
-              </Link>
-              <div className="h-6 border-l border-primary-300"></div>
-              <h1 className="text-xl font-bold text-black">
-                Review Applications
-              </h1>
-            </div>
-          </div>
+    <Layout>
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-6">
+          <Link
+            to="/employer/dashboard"
+            className="text-primary-600 hover:text-primary-800 font-medium mb-4 inline-flex items-center"
+          >
+            ← Back to Dashboard
+          </Link>
+          <h1 className="text-2xl font-bold text-black mt-4">
+            Review Applications
+          </h1>
         </div>
-      </header>
-
-      {/* Main Content */}
-      <main>
         <JobApplicationsView />
-      </main>
-    </div>
+      </div>
+    </Layout>
   );
 }

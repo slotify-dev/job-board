@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useEmployerJobs } from '../hooks/useEmployerJobs';
+import {
+  extractPlainText,
+  truncateText,
+} from '../../../shared/utils/blockEditorUtils';
 import type { EmployerJob } from '../types/employer.types';
 import { DeleteJobModal } from './DeleteJobModal';
 
@@ -150,7 +154,7 @@ export function JobManagementTable() {
                         {job.title}
                       </div>
                       <div className="text-sm text-primary-600 truncate max-w-xs">
-                        {job.description}
+                        {truncateText(extractPlainText(job.description), 60)}
                       </div>
                     </div>
                   </td>

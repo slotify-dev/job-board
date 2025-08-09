@@ -12,12 +12,15 @@ import {
 
 // Dashboard Components
 import { JobSeekerDashboard } from './modules/jobSeeker/components/JobSeekerDashboard';
-import { ProfilePageComplete } from './modules/jobSeeker/pages/ProfilePageComplete';
 import {
   EmployerDashboard,
   PostJobPage,
   EditJobPage,
+  CandidatesPage,
 } from './modules/employer';
+
+// Shared Components
+import { ProfilePage } from './shared/pages';
 import { ApplicationReviewPage } from './modules/application-review';
 
 // Job Browsing Components
@@ -76,8 +79,8 @@ export function AppRoutes() {
       <Route
         path="/profile"
         element={
-          <ProtectedRoute roles={['job_seeker']}>
-            <ProfilePageComplete />
+          <ProtectedRoute roles={['job_seeker', 'employer']}>
+            <ProfilePage />
           </ProtectedRoute>
         }
       />
@@ -130,6 +133,14 @@ export function AppRoutes() {
         element={
           <ProtectedRoute roles={['employer']}>
             <ApplicationReviewPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/employer/candidates"
+        element={
+          <ProtectedRoute roles={['employer']}>
+            <CandidatesPage />
           </ProtectedRoute>
         }
       />

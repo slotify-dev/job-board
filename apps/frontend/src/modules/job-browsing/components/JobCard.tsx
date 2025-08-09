@@ -1,4 +1,8 @@
 import type { Job } from '../types/job.types';
+import {
+  extractPlainText,
+  truncateText,
+} from '../../../shared/utils/blockEditorUtils';
 
 interface JobCardProps {
   job: Job;
@@ -37,9 +41,7 @@ export const JobCard = ({ job, onClick }: JobCardProps) => {
 
       <div className="mb-4">
         <p className="text-primary-700 line-clamp-3">
-          {job.description.length > 150
-            ? `${job.description.substring(0, 150)}...`
-            : job.description}
+          {truncateText(extractPlainText(job.description), 150)}
         </p>
       </div>
 

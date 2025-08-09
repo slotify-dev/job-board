@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEmployerJobs } from '../hooks/useEmployerJobs';
+import { BlockEditor } from '../../../shared/components/editor';
+import type { OutputData, JobStatus } from '../../../shared/types/editorTypes';
 import type { JobFormData } from '../types/employer.types';
 
 interface PostJobFormProps {
@@ -14,9 +16,9 @@ export function PostJobForm({ onCancel, onSuccess }: PostJobFormProps) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<JobFormData>({
     title: '',
-    description: '',
+    description: null,
     location: '',
-    requirements: '',
+    status: 'active',
   });
   const [errors, setErrors] = useState<Partial<JobFormData>>({});
 
@@ -29,20 +31,29 @@ export function PostJobForm({ onCancel, onSuccess }: PostJobFormProps) {
       newErrors.title = 'Job title must be at least 3 characters';
     }
 
-    if (!formData.description.trim()) {
+    if (
+      !formData.description ||
+      !formData.description.blocks ||
+      formData.description.blocks.length === 0
+    ) {
       newErrors.description = 'Job description is required';
-    } else if (formData.description.trim().length < 50) {
-      newErrors.description = 'Job description must be at least 50 characters';
+    } else {
+      // Check if description has meaningful content (not just empty paragraphs)
+      const hasContent = formData.description.blocks.some((block) => {
+        return (
+          block.type !== 'paragraph' ||
+          (block.data &&
+            typeof (block.data as Record<string, unknown>).text === 'string' &&
+            ((block.data as Record<string, unknown>).text as string).trim())
+        );
+      });
+      if (!hasContent) {
+        newErrors.description = 'Please provide a meaningful job description';
+      }
     }
 
     if (!formData.location.trim()) {
       newErrors.location = 'Location is required';
-    }
-
-    if (!formData.requirements.trim()) {
-      newErrors.requirements = 'Requirements are required';
-    } else if (formData.requirements.trim().length < 20) {
-      newErrors.requirements = 'Requirements must be at least 20 characters';
     }
 
     setErrors(newErrors);
@@ -60,9 +71,9 @@ export function PostJobForm({ onCancel, onSuccess }: PostJobFormProps) {
       setLoading(true);
       await createJob({
         title: formData.title.trim(),
-        description: formData.description.trim(),
+        description: formData.description,
         location: formData.location.trim(),
-        requirements: formData.requirements.trim(),
+        status: formData.status,
       });
 
       if (onSuccess) {
@@ -82,6 +93,19 @@ export function PostJobForm({ onCancel, onSuccess }: PostJobFormProps) {
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
+  };
+
+  const handleEditorChange = (data: OutputData) => {
+    setFormData((prev) => ({ ...prev, description: data }));
+    if (errors.description) {
+      setErrors((prev) => ({ ...prev, description: undefined }));
+    }
+  };
+
+  const handleStatusChange = (
+    status: 'active' | 'draft' | 'reviewing' | 'closed',
+  ) => {
+    setFormData((prev) => ({ ...prev, status }));
   };
 
   const handleCancel = () => {
@@ -150,56 +174,50 @@ export function PostJobForm({ onCancel, onSuccess }: PostJobFormProps) {
           </div>
 
           <div>
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium text-black mb-2"
-            >
+            <label className="block text-sm font-medium text-black mb-2">
               Job Description *
             </label>
-            <textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              rows={6}
-              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black ${
-                errors.description ? 'border-red-300' : 'border-primary-300'
-              }`}
-              placeholder="Describe the role, responsibilities, and what the candidate will be doing..."
-              disabled={loading}
+            <BlockEditor
+              data={formData.description}
+              onChange={handleEditorChange}
+              placeholder="Describe the role, responsibilities, requirements, and what the candidate will be doing..."
+              readOnly={loading}
+              minHeight={300}
             />
             {errors.description && (
               <p className="mt-1 text-sm text-red-600">{errors.description}</p>
             )}
             <p className="mt-1 text-sm text-primary-500">
-              {formData.description.length}/50 characters minimum
+              Use the rich text editor to create a detailed job description with
+              formatting, lists, and more.
             </p>
           </div>
 
           <div>
             <label
-              htmlFor="requirements"
+              htmlFor="status"
               className="block text-sm font-medium text-black mb-2"
             >
-              Requirements *
+              Job Status
             </label>
-            <textarea
-              id="requirements"
-              value={formData.requirements}
-              onChange={(e) =>
-                handleInputChange('requirements', e.target.value)
-              }
-              rows={4}
-              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black ${
-                errors.requirements ? 'border-red-300' : 'border-primary-300'
-              }`}
-              placeholder="List the required skills, experience, and qualifications..."
+            <select
+              id="status"
+              value={formData.status}
+              onChange={(e) => handleStatusChange(e.target.value as JobStatus)}
+              className="w-full px-3 py-2 border border-primary-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
               disabled={loading}
-            />
-            {errors.requirements && (
-              <p className="mt-1 text-sm text-red-600">{errors.requirements}</p>
-            )}
+            >
+              <option value="active">Active - Accepting applications</option>
+              <option value="draft">Draft - Not visible to candidates</option>
+              <option value="reviewing">
+                Reviewing - Currently reviewing applications
+              </option>
+              <option value="closed">
+                Closed - No longer accepting applications
+              </option>
+            </select>
             <p className="mt-1 text-sm text-primary-500">
-              {formData.requirements.length}/20 characters minimum
+              Choose the current status of this job posting
             </p>
           </div>
 

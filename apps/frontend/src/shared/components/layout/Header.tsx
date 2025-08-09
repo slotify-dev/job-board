@@ -100,6 +100,31 @@ export const Header = () => {
                             My Applications
                           </Link>
                         )}
+                        {user?.role === 'employer' && (
+                          <>
+                            <Link
+                              to="/employer/post-job"
+                              className="block px-4 py-2 text-sm text-primary-700 hover:bg-primary-50 transition-colors"
+                              onClick={() => setIsMenuOpen(false)}
+                            >
+                              Post Job
+                            </Link>
+                            <Link
+                              to="/employer/dashboard"
+                              className="block px-4 py-2 text-sm text-primary-700 hover:bg-primary-50 transition-colors"
+                              onClick={() => setIsMenuOpen(false)}
+                            >
+                              Manage Jobs
+                            </Link>
+                            <Link
+                              to="/employer/candidates"
+                              className="block px-4 py-2 text-sm text-primary-700 hover:bg-primary-50 transition-colors"
+                              onClick={() => setIsMenuOpen(false)}
+                            >
+                              Candidates
+                            </Link>
+                          </>
+                        )}
                         <Link
                           to="/profile"
                           className="block px-4 py-2 text-sm text-primary-700 hover:bg-primary-50 transition-colors"
@@ -187,6 +212,31 @@ export const Header = () => {
                     >
                       My Applications
                     </Link>
+                  )}
+                  {user?.role === 'employer' && (
+                    <>
+                      <Link
+                        to="/employer/post-job"
+                        className="block text-primary-600 hover:text-black transition-colors font-medium py-2"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Post Job
+                      </Link>
+                      <Link
+                        to="/employer/dashboard"
+                        className="block text-primary-600 hover:text-black transition-colors font-medium py-2"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Manage Jobs
+                      </Link>
+                      <Link
+                        to="/employer/candidates"
+                        className="block text-primary-600 hover:text-black transition-colors font-medium py-2"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Candidates
+                      </Link>
+                    </>
                   )}
                   <Link
                     to="/profile"

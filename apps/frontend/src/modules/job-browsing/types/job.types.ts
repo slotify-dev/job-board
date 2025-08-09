@@ -1,7 +1,9 @@
+import { EditorData } from '../../../shared/types/editorTypes';
+
 export interface Job {
   uuid: string;
   title: string;
-  description: string;
+  description: EditorData; // Block editor JSON data
   location: string | null;
   status: string;
   companyName: string | null;

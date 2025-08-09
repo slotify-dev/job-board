@@ -8,6 +8,8 @@ export { DeleteJobModal } from './components/DeleteJobModal';
 // Pages
 export { PostJobPage } from './pages/PostJobPage';
 export { EditJobPage } from './pages/EditJobPage';
+export { CandidatesPage } from './pages/CandidatesPage';
+export { EmployerProfilePage } from './pages/EmployerProfilePage';
 
 // Hooks
 export { useEmployerJobs } from './hooks/useEmployerJobs';

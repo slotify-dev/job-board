@@ -4,9 +4,9 @@ import {
   integer,
   uuid,
   varchar,
-  text,
   timestamp,
   index,
+  json,
 } from 'drizzle-orm/pg-core';
 import { employers } from './employer.model';
 
@@ -19,10 +19,9 @@ export const jobs = pgTable(
       .notNull()
       .references(() => employers.userId),
     title: varchar('title', { length: 255 }).notNull(),
-    description: text('description').notNull(),
+    description: json('description').notNull(), // Store block editor JSON content
     location: varchar('location', { length: 255 }),
-    requirements: text('requirements'),
-    status: varchar('status', { length: 20 }).notNull().default('active'), // 'active' | 'closed' | 'draft'
+    status: varchar('status', { length: 20 }).notNull().default('active'), // 'active' | 'closed' | 'draft' | 'reviewing'
     createdAt: timestamp('created_at').notNull().defaultNow(),
   },
   (table) => ({
