@@ -243,81 +243,84 @@ export function ProfileEditForm({ onCancel, onSaved }: ProfileEditFormProps) {
 
             <div>
               <label className="block text-sm font-medium text-primary-700 mb-2">
-                Resume
+                Address
               </label>
-              <div className="space-y-3">
-                {/* File Upload */}
-                <div>
-                  <input
-                    type="file"
-                    id="resumeFile"
-                    accept=".pdf,.doc,.docx"
-                    onChange={handleFileChange}
-                    className="input-field"
-                    disabled={isSubmitting}
-                  />
-                  <p className="text-primary-500 text-sm mt-1">
-                    Upload your resume as PDF, DOC, or DOCX (max 5MB)
-                  </p>
-                  {selectedFile && (
-                    <p className="text-green-600 text-sm mt-1">
-                      Selected: {selectedFile.name}
-                    </p>
-                  )}
-                  {errors.resumeFile && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.resumeFile}
-                    </p>
-                  )}
-                </div>
+              <textarea
+                id="address"
+                name="address"
+                value={formData.address}
+                onChange={handleInputChange}
+                rows={3}
+                className={`input-field ${errors.address ? 'border-red-500' : ''}`}
+                placeholder="123 Main St, City, State 12345"
+                disabled={isSubmitting}
+              />
+              {errors.address && (
+                <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+              )}
+            </div>
+          </div>
+        </div>
 
-                {/* OR divider */}
-                <div className="flex items-center">
-                  <div className="flex-1 border-t border-primary-200"></div>
-                  <span className="px-3 text-sm text-primary-500">OR</span>
-                  <div className="flex-1 border-t border-primary-200"></div>
-                </div>
+        {/* Resume Section */}
+        <div>
+          <h3 className="text-lg font-medium text-black mb-3">Resume</h3>
+          <div className="space-y-4">
+            {/* File Upload */}
+            <div>
+              <label className="block text-sm font-medium text-primary-700 mb-2">
+                Upload Resume
+              </label>
+              <input
+                type="file"
+                id="resumeFile"
+                accept=".pdf,.doc,.docx"
+                onChange={handleFileChange}
+                className="input-field"
+                disabled={isSubmitting}
+              />
+              <p className="text-primary-500 text-sm mt-1">
+                Upload your resume as PDF, DOC, or DOCX (max 5MB)
+              </p>
+              {selectedFile && (
+                <p className="text-green-600 text-sm mt-1">
+                  Selected: {selectedFile.name}
+                </p>
+              )}
+              {errors.resumeFile && (
+                <p className="text-red-500 text-sm mt-1">{errors.resumeFile}</p>
+              )}
+            </div>
 
-                {/* URL Input */}
-                <div>
-                  <input
-                    type="url"
-                    id="resumeUrl"
-                    name="resumeUrl"
-                    value={formData.resumeUrl}
-                    onChange={handleInputChange}
-                    className={`input-field ${errors.resumeUrl ? 'border-red-500' : ''}`}
-                    placeholder="https://drive.google.com/..."
-                    disabled={isSubmitting}
-                  />
-                  <p className="text-primary-500 text-sm mt-1">
-                    Link to your resume (Google Drive, Dropbox, etc.)
-                  </p>
-                </div>
-              </div>
+            {/* OR divider */}
+            <div className="flex items-center">
+              <div className="flex-1 border-t border-primary-200"></div>
+              <span className="px-3 text-sm text-primary-500">OR</span>
+              <div className="flex-1 border-t border-primary-200"></div>
+            </div>
+
+            {/* URL Input */}
+            <div>
+              <label className="block text-sm font-medium text-primary-700 mb-2">
+                Resume URL
+              </label>
+              <input
+                type="url"
+                id="resumeUrl"
+                name="resumeUrl"
+                value={formData.resumeUrl}
+                onChange={handleInputChange}
+                className={`input-field ${errors.resumeUrl ? 'border-red-500' : ''}`}
+                placeholder="https://drive.google.com/..."
+                disabled={isSubmitting}
+              />
+              <p className="text-primary-500 text-sm mt-1">
+                Link to your resume (Google Drive, Dropbox, etc.)
+              </p>
               {errors.resumeUrl && (
                 <p className="text-red-500 text-sm mt-1">{errors.resumeUrl}</p>
               )}
             </div>
-          </div>
-
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-primary-700 mb-2">
-              Address
-            </label>
-            <textarea
-              id="address"
-              name="address"
-              value={formData.address}
-              onChange={handleInputChange}
-              rows={3}
-              className={`input-field ${errors.address ? 'border-red-500' : ''}`}
-              placeholder="123 Main St, City, State 12345"
-              disabled={isSubmitting}
-            />
-            {errors.address && (
-              <p className="text-red-500 text-sm mt-1">{errors.address}</p>
-            )}
           </div>
         </div>
 
