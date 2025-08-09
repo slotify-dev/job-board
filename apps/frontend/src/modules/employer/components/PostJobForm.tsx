@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import { useEmployerJobs } from '../hooks/useEmployerJobs';
-import { BlockEditor } from '../../../shared/components/editor';
 import type { OutputData, JobStatus } from '../../../shared/types/editorTypes';
-import type { JobFormData } from '../types/employer.types';
+import { BlockEditorWrapper } from './BlockEditorWrapper';
 
 interface PostJobFormProps {
   onCancel?: () => void;
@@ -14,32 +14,37 @@ export function PostJobForm({ onCancel, onSuccess }: PostJobFormProps) {
   const navigate = useNavigate();
   const { createJob } = useEmployerJobs();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<JobFormData>({
-    title: '',
-    description: null,
-    location: '',
-    status: 'active',
-  });
-  const [errors, setErrors] = useState<Partial<JobFormData>>({});
 
-  const validateForm = (): boolean => {
-    const newErrors: Partial<JobFormData> = {};
+  // ✅ Keep state separate to avoid full re-renders
+  const [title, setTitle] = useState('');
+  const [location, setLocation] = useState('');
+  const [description, setDescription] = useState<OutputData | null>(null);
+  const [status, setStatus] = useState<JobStatus>('active');
 
-    if (!formData.title.trim()) {
+  const [errors, setErrors] = useState<{
+    title?: string;
+    description?: string;
+    location?: string;
+  }>({});
+
+  // ✅ Validation
+  const validateForm = useCallback((): boolean => {
+    const newErrors: typeof errors = {};
+
+    if (!title.trim()) {
       newErrors.title = 'Job title is required';
-    } else if (formData.title.trim().length < 3) {
+    } else if (title.trim().length < 3) {
       newErrors.title = 'Job title must be at least 3 characters';
     }
 
     if (
-      !formData.description ||
-      !formData.description.blocks ||
-      formData.description.blocks.length === 0
+      !description ||
+      !description.blocks ||
+      description.blocks.length === 0
     ) {
       newErrors.description = 'Job description is required';
     } else {
-      // Check if description has meaningful content (not just empty paragraphs)
-      const hasContent = formData.description.blocks.some((block) => {
+      const hasContent = description.blocks.some((block) => {
         return (
           block.type !== 'paragraph' ||
           (block.data &&
@@ -52,69 +57,67 @@ export function PostJobForm({ onCancel, onSuccess }: PostJobFormProps) {
       }
     }
 
-    if (!formData.location.trim()) {
+    if (!location.trim()) {
       newErrors.location = 'Location is required';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [title, location, description]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-      await createJob({
-        title: formData.title.trim(),
-        description: formData.description,
-        location: formData.location.trim(),
-        status: formData.status,
-      });
-
-      if (onSuccess) {
-        onSuccess();
-      } else {
-        navigate('/employer/dashboard');
+  // ✅ Callbacks so they don't change every render
+  const handleEditorChange = useCallback(
+    (data: OutputData) => {
+      setDescription(data);
+      if (errors.description) {
+        setErrors((prev) => ({ ...prev, description: undefined }));
       }
-    } catch {
-      // Error is handled in the hook
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [errors.description],
+  );
 
-  const handleInputChange = (field: keyof JobFormData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
-  };
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!validateForm()) return;
 
-  const handleEditorChange = (data: OutputData) => {
-    setFormData((prev) => ({ ...prev, description: data }));
-    if (errors.description) {
-      setErrors((prev) => ({ ...prev, description: undefined }));
-    }
-  };
+      try {
+        setLoading(true);
+        await createJob({
+          title: title.trim(),
+          description,
+          location: location.trim(),
+          status,
+        });
 
-  const handleStatusChange = (
-    status: 'active' | 'draft' | 'reviewing' | 'closed',
-  ) => {
-    setFormData((prev) => ({ ...prev, status }));
-  };
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          navigate('/employer/dashboard');
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [
+      title,
+      location,
+      description,
+      status,
+      validateForm,
+      createJob,
+      onSuccess,
+      navigate,
+    ],
+  );
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     if (onCancel) {
       onCancel();
     } else {
       navigate('/employer/dashboard');
     }
-  };
+  }, [onCancel, navigate]);
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -127,6 +130,7 @@ export function PostJobForm({ onCancel, onSuccess }: PostJobFormProps) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Title */}
           <div>
             <label
               htmlFor="title"
@@ -137,8 +141,12 @@ export function PostJobForm({ onCancel, onSuccess }: PostJobFormProps) {
             <input
               type="text"
               id="title"
-              value={formData.title}
-              onChange={(e) => handleInputChange('title', e.target.value)}
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                if (errors.title)
+                  setErrors((prev) => ({ ...prev, title: undefined }));
+              }}
               className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black ${
                 errors.title ? 'border-red-300' : 'border-primary-300'
               }`}
@@ -150,6 +158,7 @@ export function PostJobForm({ onCancel, onSuccess }: PostJobFormProps) {
             )}
           </div>
 
+          {/* Location */}
           <div>
             <label
               htmlFor="location"
@@ -160,8 +169,12 @@ export function PostJobForm({ onCancel, onSuccess }: PostJobFormProps) {
             <input
               type="text"
               id="location"
-              value={formData.location}
-              onChange={(e) => handleInputChange('location', e.target.value)}
+              value={location}
+              onChange={(e) => {
+                setLocation(e.target.value);
+                if (errors.location)
+                  setErrors((prev) => ({ ...prev, location: undefined }));
+              }}
               className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black ${
                 errors.location ? 'border-red-300' : 'border-primary-300'
               }`}
@@ -173,16 +186,15 @@ export function PostJobForm({ onCancel, onSuccess }: PostJobFormProps) {
             )}
           </div>
 
+          {/* Description */}
           <div>
             <label className="block text-sm font-medium text-black mb-2">
               Job Description *
             </label>
-            <BlockEditor
-              data={formData.description}
-              onChange={handleEditorChange}
-              placeholder="Describe the role, responsibilities, requirements, and what the candidate will be doing..."
+            <BlockEditorWrapper
               readOnly={loading}
-              minHeight={300}
+              value={description}
+              onChange={handleEditorChange}
             />
             {errors.description && (
               <p className="mt-1 text-sm text-red-600">{errors.description}</p>
@@ -193,6 +205,7 @@ export function PostJobForm({ onCancel, onSuccess }: PostJobFormProps) {
             </p>
           </div>
 
+          {/* Status */}
           <div>
             <label
               htmlFor="status"
@@ -202,8 +215,8 @@ export function PostJobForm({ onCancel, onSuccess }: PostJobFormProps) {
             </label>
             <select
               id="status"
-              value={formData.status}
-              onChange={(e) => handleStatusChange(e.target.value as JobStatus)}
+              value={status}
+              onChange={(e) => setStatus(e.target.value as JobStatus)}
               className="w-full px-3 py-2 border border-primary-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
               disabled={loading}
             >
@@ -221,6 +234,7 @@ export function PostJobForm({ onCancel, onSuccess }: PostJobFormProps) {
             </p>
           </div>
 
+          {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3 pt-4">
             <button
               type="submit"
