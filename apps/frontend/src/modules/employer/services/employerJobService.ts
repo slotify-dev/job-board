@@ -28,7 +28,7 @@ export const employerJobService = {
 
   async createJob(jobData: CreateJobRequest): Promise<CreateJobResponse> {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_BASE_URL}/jobs`, {
+    const response = await fetch(`${API_BASE_URL}/employer/jobs`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -46,19 +46,22 @@ export const employerJobService = {
 
   async updateJob(jobData: UpdateJobRequest): Promise<CreateJobResponse> {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_BASE_URL}/jobs/${jobData.uuid}`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      `${API_BASE_URL}/employer/jobs/${jobData.uuid}`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: jobData.title,
+          description: jobData.description,
+          location: jobData.location,
+          requirements: jobData.requirements,
+        }),
       },
-      body: JSON.stringify({
-        title: jobData.title,
-        description: jobData.description,
-        location: jobData.location,
-        requirements: jobData.requirements,
-      }),
-    });
+    );
 
     if (!response.ok) {
       throw new Error('Failed to update job');
@@ -69,7 +72,7 @@ export const employerJobService = {
 
   async deleteJob(uuid: string): Promise<{ success: boolean }> {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_BASE_URL}/jobs/${uuid}`, {
+    const response = await fetch(`${API_BASE_URL}/employer/jobs/${uuid}`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${token}`,

@@ -168,6 +168,12 @@ export function JobManagementTable() {
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end space-x-2">
                       <Link
+                        to={`/employer/job/${job.uuid}/applications`}
+                        className="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded text-xs font-medium"
+                      >
+                        Applications
+                      </Link>
+                      <Link
                         to={`/employer/edit-job/${job.uuid}`}
                         className="text-black hover:text-primary-700 bg-primary-100 hover:bg-primary-200 px-3 py-1 rounded text-xs font-medium"
                       >

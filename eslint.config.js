@@ -105,6 +105,13 @@ export default [
         document: 'readonly',
         localStorage: 'readonly',
         sessionStorage: 'readonly',
+        HTMLSelectElement: 'readonly',
+        HTMLInputElement: 'readonly',
+        HTMLTextAreaElement: 'readonly',
+        HTMLButtonElement: 'readonly',
+        HTMLElement: 'readonly',
+        Event: 'readonly',
+        MouseEvent: 'readonly',
       },
     },
     rules: {

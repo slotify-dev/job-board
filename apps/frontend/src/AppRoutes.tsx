@@ -17,6 +17,7 @@ import {
   PostJobPage,
   EditJobPage,
 } from './modules/employer';
+import { ApplicationReviewPage } from './modules/application-review';
 
 // Job Browsing Components
 import { HomePage } from './modules/job-browsing/pages/HomePage';
@@ -112,6 +113,14 @@ export function AppRoutes() {
         element={
           <ProtectedRoute roles={['employer']}>
             <EditJobPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/employer/job/:jobId/applications"
+        element={
+          <ProtectedRoute roles={['employer']}>
+            <ApplicationReviewPage />
           </ProtectedRoute>
         }
       />
