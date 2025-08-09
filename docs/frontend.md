@@ -42,9 +42,17 @@ a custom auth layer.
 
 ### 6. Edit My Profile
 
-- Job Seeker: name, email, summary
-- Employer: company name, contact person
-- Formik/Yup forms
+- Job Seeker Profile: Logged-in Job Seekers should be able to
+  - view their own profile information
+  - edit and update their details (e.g., contact information, basic resume summary).
+
+- Employer Profile: Logged-in Employers should be able to
+  - view their own profile
+  - update their details (e.g., company name, contact person).
+
+- Viewing Other User's Info: Employers should be able to
+  - view relevant information about Job Seekers who have applied to their jobs
+    - (e.g., contact details, uploaded resume/cover letter).
 
 ---
 

@@ -113,7 +113,10 @@ export function JobSeekerDashboard() {
             </div>
           </div>
 
-          <div className="card hover:shadow-md transition-shadow cursor-pointer">
+          <a
+            href="/profile"
+            className="card hover:shadow-md transition-shadow cursor-pointer block"
+          >
             <div className="text-center">
               <div className="w-12 h-12 bg-black rounded-lg mx-auto mb-3 flex items-center justify-center">
                 <svg
@@ -135,7 +138,7 @@ export function JobSeekerDashboard() {
                 Update your information
               </p>
             </div>
-          </div>
+          </a>
         </div>
 
         {/* Recent Activity */}

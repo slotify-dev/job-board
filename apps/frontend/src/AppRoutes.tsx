@@ -12,6 +12,7 @@ import {
 
 // Dashboard Components
 import { JobSeekerDashboard } from './modules/jobSeeker/components/JobSeekerDashboard';
+import { ProfilePageBasic } from './modules/jobSeeker/pages/ProfilePageBasic';
 import {
   EmployerDashboard,
   PostJobPage,
@@ -69,6 +70,14 @@ export function AppRoutes() {
         element={
           <ProtectedRoute roles={['job_seeker']}>
             <MyApplicationsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute roles={['job_seeker']}>
+            <ProfilePageBasic />
           </ProtectedRoute>
         }
       />
