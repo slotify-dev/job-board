@@ -26,6 +26,9 @@ COPY apps/backend ./apps/backend
 # Set working directory to backend app
 WORKDIR /app/apps/backend
 
+# Create uploads directory with proper permissions
+RUN mkdir -p uploads/resumes && chmod -R 755 uploads
+
 # Expose port
 EXPOSE ${PORT}
 ENV PORT=${PORT}
