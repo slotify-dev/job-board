@@ -1,27 +1,23 @@
-import { EditorData, JobStatus } from '../../../shared/types/editorTypes';
+import type {
+  CreateJobRequest as SharedCreateJobRequest,
+  UpdateJobRequest as SharedUpdateJobRequest,
+  EmployerJob as SharedEmployerJob,
+  JobResponse,
+  JobStatus,
+  EditorData,
+} from '@job-board/shared-types';
 
-export interface CreateJobRequest {
-  title: string;
-  description: EditorData; // Block editor JSON data
-  location?: string;
-  status?: JobStatus;
-}
+// Re-export shared types
+export type CreateJobRequest = SharedCreateJobRequest;
+export type UpdateJobRequest = SharedUpdateJobRequest;
 
-export interface UpdateJobRequest extends CreateJobRequest {
-  uuid: string;
-}
-
-export interface EmployerJob {
-  uuid: string;
-  title: string;
-  description: EditorData; // Block editor JSON data
-  location: string | null;
-  status: JobStatus;
-  companyName: string | null;
-  createdAt: Date;
+// Frontend EmployerJob extends shared type with additional fields
+export interface EmployerJob extends SharedEmployerJob {
   updatedAt: Date;
+  companyName: string | null;
 }
 
+// Frontend response extends shared response
 export interface EmployerJobsResponse {
   success: boolean;
   jobs: EmployerJob[];
@@ -30,15 +26,14 @@ export interface EmployerJobsResponse {
   limit: number;
 }
 
-export interface CreateJobResponse {
-  success: boolean;
+export interface CreateJobResponse extends JobResponse {
   job?: EmployerJob;
   message?: string;
 }
 
 export interface JobFormData {
   title: string;
-  description: EditorData; // Block editor JSON data
+  description: EditorData;
   location: string;
   status: JobStatus;
 }

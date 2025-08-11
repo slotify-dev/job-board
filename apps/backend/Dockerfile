@@ -7,8 +7,17 @@ ARG PORT=3000
 # Copy package files (optimized for layer caching)
 COPY package.json bun.lockb* ./
 COPY apps/backend/package.json ./apps/backend/
+COPY packages/shared/types/package.json ./packages/shared/types/
 
-# Install dependencies
+# Copy shared types source (needed for local package resolution)
+COPY packages/shared/types ./packages/shared/types
+
+# Build shared types package first
+WORKDIR /app/packages/shared/types
+RUN bun install && bun run build
+
+# Go back to root and install all dependencies
+WORKDIR /app
 RUN bun install --frozen-lockfile
 
 # Copy source code (exclude unnecessary files via .dockerignore)

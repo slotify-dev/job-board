@@ -14,6 +14,7 @@ import { healthRoutes } from './modules/health/health.routes.js';
 import { profileRoutes } from './modules/profile/profile.routes.js';
 import { employerRoutes } from './modules/employer/employer.routes.js';
 import { applicationsRoutes } from './modules/applications/applications.routes.js';
+import { uploadRoutes } from './modules/upload/upload.routes.js';
 import { globalRateLimit } from './middleware/rateLimiters.js';
 
 export const createApp = (): Application => {
@@ -45,6 +46,9 @@ export const createApp = (): Application => {
   // Logging middleware
   app.use(morgan(isDevelopment ? 'dev' : 'combined'));
 
+  // Serve uploaded files
+  app.use('/uploads', express.static('uploads'));
+
   // Routes
   app.use('/api', healthRoutes);
   app.use('/api/auth', authRoutes);
@@ -52,6 +56,7 @@ export const createApp = (): Application => {
   app.use('/api', applicationsRoutes);
   app.use('/api/employer', employerRoutes);
   app.use('/api/me/profile', profileRoutes);
+  app.use('/api/upload', uploadRoutes);
 
   // Error handling middleware (must be last)
   app.use(errorMiddleware);

@@ -27,7 +27,7 @@ export const useApplyToJob = () => {
       applicationData,
     }: {
       jobUuid: string;
-      applicationData: CreateApplicationRequest;
+      applicationData: CreateApplicationRequest | FormData;
     }) => applicationService.applyToJob(jobUuid, applicationData),
     onSuccess: () => {
       // Invalidate and refetch my applications

@@ -15,7 +15,7 @@ export const jobParamsSchema = z.object({
 export interface PublicJob {
   uuid: string;
   title: string;
-  description: string;
+  description: Record<string, unknown>; // JSON content from block editor
   location: string | null;
   status: string;
   companyName: string | null;

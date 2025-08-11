@@ -11,16 +11,30 @@ export const applicationService = {
   // Apply to a job
   async applyToJob(
     jobUuid: string,
-    applicationData: CreateApplicationRequest,
+    applicationData: CreateApplicationRequest | FormData,
   ): Promise<ApplicationResponse> {
-    const response = await fetch(`${API_BASE_URL}/jobs/${jobUuid}/apply`, {
+    const isFormData = applicationData instanceof FormData;
+
+    const requestConfig: RequestInit = {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       credentials: 'include',
-      body: JSON.stringify(applicationData),
-    });
+    };
+
+    if (isFormData) {
+      // For FormData, don't set Content-Type header - browser will set it with boundary
+      requestConfig.body = applicationData;
+    } else {
+      // For JSON data
+      requestConfig.headers = {
+        'Content-Type': 'application/json',
+      };
+      requestConfig.body = JSON.stringify(applicationData);
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/jobs/${jobUuid}/apply`,
+      requestConfig,
+    );
 
     if (!response.ok) {
       throw new Error(`Failed to apply to job: ${response.statusText}`);

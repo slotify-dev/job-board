@@ -7,8 +7,17 @@ ARG PORT=5173
 # 1. First copy only package files for better caching
 COPY package.json ./
 COPY apps/frontend/package.json ./apps/frontend/
+COPY packages/shared/types/package.json ./packages/shared/types/
 
-# 2. Install dependencies
+# Copy shared types source (needed for local package resolution)
+COPY packages/shared/types ./packages/shared/types
+
+# Build shared types package first
+WORKDIR /app/packages/shared/types
+RUN npm install && npm run build
+
+# Go back to root and install all dependencies
+WORKDIR /app
 RUN npm install
 
 # 3. Copy all frontend app files

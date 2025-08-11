@@ -4,13 +4,15 @@ import { useJob } from '../hooks/useJobs';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { Layout } from '../../../shared/components/layout';
 import { BlockRenderer } from '../../../shared/components/editor';
-import { JobApplicationModal } from '../components/JobApplicationModal';
+import { JobApplicationForm } from '../components/JobApplicationForm';
 
 export const JobDetailsPage = () => {
   const { uuid } = useParams<{ uuid: string }>();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
-  const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'description' | 'apply'>(
+    'description',
+  );
 
   const { data, isLoading, error } = useJob(uuid!);
 
@@ -22,22 +24,23 @@ export const JobDetailsPage = () => {
     }).format(new Date(date));
   };
 
-  const handleApply = () => {
+  const handleApplyTabClick = () => {
     if (!isAuthenticated) {
       navigate('/auth/login');
       return;
     }
 
     if (user?.role !== 'job_seeker') {
-      window.alert('Only job seekers can apply for jobs.');
+      // Show modern notification instead of alert
       return;
     }
 
-    setIsApplicationModalOpen(true);
+    setActiveTab('apply');
   };
 
   const handleApplicationSuccess = () => {
-    window.alert('Application submitted successfully!');
+    // Application success is now handled by the form component
+    setActiveTab('description');
   };
 
   if (isLoading) {
@@ -111,15 +114,67 @@ export const JobDetailsPage = () => {
                 </div>
               </div>
 
-              {/* Job Description */}
-              <div>
-                <h2 className="text-xl font-semibold text-black mb-4">
+              {/* Tab Navigation */}
+              <div className="flex border-b border-gray-200 mb-6">
+                <button
+                  onClick={() => setActiveTab('description')}
+                  className={`py-2 px-4 text-sm font-medium border-b-2 transition-colors ${
+                    activeTab === 'description'
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
                   Job Description
-                </h2>
+                </button>
+                {job.status === 'active' && (
+                  <button
+                    onClick={handleApplyTabClick}
+                    className={`py-2 px-4 text-sm font-medium border-b-2 transition-colors ${
+                      activeTab === 'apply'
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    Apply Now
+                  </button>
+                )}
+              </div>
+
+              {/* Tab Content */}
+              {activeTab === 'description' && (
                 <div className="prose max-w-none">
                   <BlockRenderer data={job.description} />
                 </div>
-              </div>
+              )}
+
+              {activeTab === 'apply' && job.status === 'active' && (
+                <div>
+                  {isAuthenticated && user?.role === 'job_seeker' ? (
+                    <JobApplicationForm
+                      jobUuid={job.uuid}
+                      jobTitle={job.title}
+                      companyName={job.companyName || 'Company'}
+                      onSuccess={handleApplicationSuccess}
+                    />
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-gray-600 mb-4">
+                        {!isAuthenticated
+                          ? 'Please log in to apply for this position'
+                          : 'Only job seekers can apply for jobs'}
+                      </p>
+                      {!isAuthenticated && (
+                        <button
+                          onClick={() => navigate('/auth/login')}
+                          className="btn-primary"
+                        >
+                          Log In
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -165,11 +220,11 @@ export const JobDetailsPage = () => {
                   </p>
                 </div>
 
-                {/* Apply Button - Only show for active jobs */}
+                {/* Quick Apply Button - Only show for active jobs */}
                 {job.status === 'active' && (
                   <div className="pt-4 border-t border-primary-200">
                     <button
-                      onClick={handleApply}
+                      onClick={handleApplyTabClick}
                       className="btn-primary w-full"
                     >
                       {isAuthenticated
@@ -190,18 +245,6 @@ export const JobDetailsPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Job Application Modal */}
-      {data?.job && (
-        <JobApplicationModal
-          jobUuid={data.job.uuid}
-          jobTitle={data.job.title}
-          companyName={data.job.companyName || 'Company'}
-          isOpen={isApplicationModalOpen}
-          onClose={() => setIsApplicationModalOpen(false)}
-          onSuccess={handleApplicationSuccess}
-        />
-      )}
     </Layout>
   );
 };

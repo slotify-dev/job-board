@@ -15,7 +15,6 @@ describe('Employer Schemas', () => {
         title: 'Software Engineer',
         description: 'We are looking for a skilled software engineer...',
         location: 'San Francisco, CA',
-        requirements: 'Bachelor degree in Computer Science',
         status: 'active' as const,
       };
 
@@ -42,19 +41,20 @@ describe('Employer Schemas', () => {
       }
     });
 
-    it('should include requirements field when provided', () => {
-      const jobWithRequirements = {
+    it('should handle JSON description content', () => {
+      const jobWithJSONDescription = {
         title: 'Senior Developer',
-        description: 'Senior position',
-        requirements: '5+ years experience, React, Node.js',
+        description: {
+          blocks: [{ type: 'paragraph', content: 'Senior position' }],
+        },
       };
 
-      const result = createJobSchema.safeParse(jobWithRequirements);
+      const result = createJobSchema.safeParse(jobWithJSONDescription);
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.requirements).toBe(
-          '5+ years experience, React, Node.js',
-        );
+        expect(result.data.description).toEqual({
+          blocks: [{ type: 'paragraph', content: 'Senior position' }],
+        });
       }
     });
 
@@ -95,22 +95,14 @@ describe('Employer Schemas', () => {
       }
     });
 
-    it('should fail validation with empty description', () => {
+    it('should accept any description format', () => {
       const invalidJob = {
         title: 'Software Engineer',
         description: '',
       };
 
       const result = createJobSchema.safeParse(invalidJob);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues).toContainEqual(
-          expect.objectContaining({
-            path: ['description'],
-            message: 'String must contain at least 1 character(s)',
-          }),
-        );
-      }
+      expect(result.success).toBe(true);
     });
 
     it('should fail validation with invalid status', () => {
@@ -127,7 +119,7 @@ describe('Employer Schemas', () => {
           expect.objectContaining({
             path: ['status'],
             message:
-              "Invalid enum value. Expected 'active' | 'draft', received 'invalid-status'",
+              "Invalid enum value. Expected 'active' | 'draft' | 'reviewing' | 'closed', received 'invalid-status'",
           }),
         );
       }
@@ -158,7 +150,6 @@ describe('Employer Schemas', () => {
     it('should validate partial job updates', () => {
       const update = {
         title: 'Senior Software Engineer',
-        requirements: 'Updated requirements',
       };
 
       const result = updateJobSchema.safeParse(update);
@@ -181,7 +172,7 @@ describe('Employer Schemas', () => {
     });
 
     it('should accept all valid status values', () => {
-      const validStatuses = ['active', 'closed', 'draft'] as const;
+      const validStatuses = ['active', 'closed', 'draft', 'reviewing'] as const;
 
       validStatuses.forEach((status) => {
         const result = updateJobSchema.safeParse({ status });
@@ -195,7 +186,13 @@ describe('Employer Schemas', () => {
 
   describe('updateApplicationStatusSchema', () => {
     it('should validate all valid application status values', () => {
-      const validStatuses = ['reviewed', 'accepted', 'rejected'] as const;
+      const validStatuses = [
+        'pending',
+        'reviewing',
+        'interviewed',
+        'accepted',
+        'rejected',
+      ] as const;
 
       validStatuses.forEach((status) => {
         const result = updateApplicationStatusSchema.safeParse({ status });
@@ -216,7 +213,7 @@ describe('Employer Schemas', () => {
           expect.objectContaining({
             path: ['status'],
             message:
-              "Invalid enum value. Expected 'reviewed' | 'accepted' | 'rejected', received 'invalid'",
+              "Invalid enum value. Expected 'pending' | 'reviewing' | 'interviewed' | 'accepted' | 'rejected', received 'invalid'",
           }),
         );
       }

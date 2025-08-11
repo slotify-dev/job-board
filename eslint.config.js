@@ -134,6 +134,12 @@ export default [
         HTMLElement: 'readonly',
         Event: 'readonly',
         MouseEvent: 'readonly',
+        File: 'readonly',
+        FileList: 'readonly',
+        FormData: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        RequestInit: 'readonly',
       },
     },
     rules: {

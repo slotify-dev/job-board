@@ -35,6 +35,38 @@ export default class ApplicationRepository {
     }
   }
 
+  static async findByUuidWithJobSeeker(
+    uuid: string,
+  ): Promise<ApplicationWithJobSeeker | null> {
+    try {
+      const result = await db
+        .select({
+          id: applications.id,
+          uuid: applications.uuid,
+          jobId: applications.jobId,
+          jobSeekerId: applications.jobSeekerId,
+          resumeUrl: applications.resumeUrl,
+          coverLetter: applications.coverLetter,
+          status: applications.status,
+          createdAt: applications.createdAt,
+          jobSeekerName: jobSeekers.fullName,
+          jobSeekerEmail: jobSeekers.email,
+          jobSeekerUuid: jobSeekers.userId,
+        })
+        .from(applications)
+        .leftJoin(jobSeekers, eq(applications.jobSeekerId, jobSeekers.userId))
+        .where(eq(applications.uuid, uuid))
+        .limit(1);
+      return result[0] || null;
+    } catch (error) {
+      console.error(
+        'Error finding application by UUID with job seeker:',
+        error,
+      );
+      throw error;
+    }
+  }
+
   static async findByJobSeekerId(
     jobSeekerId: number,
   ): Promise<ApplicationWithJob[]> {

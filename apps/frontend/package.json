@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@job-board/shared-types": "file:../../packages/shared/types",
     "@auth0/auth0-react": "^2.4.0",
     "@editorjs/delimiter": "^1.4.2",
     "@editorjs/editorjs": "^2.30.8",

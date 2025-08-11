@@ -6,6 +6,7 @@ import validateRequest from '../../middleware/validateRequest';
 import validateParams from '../../middleware/validateParams';
 import { createApplicationSchema, jobParamsSchema } from './applications.types';
 import { jobApplicationRateLimit } from '../../middleware/rateLimiters';
+import { uploadResume } from '../../middleware/fileUpload';
 
 const router = Router();
 const applicationsController = new ApplicationsController();
@@ -18,6 +19,17 @@ router.post(
   requireRole(['job_seeker']),
   jobApplicationRateLimit,
   validateParams(jobParamsSchema),
+  uploadResume, // Handle file upload first
+  // Custom validation that checks for either file or URL
+  (req, res, next) => {
+    if (!req.file && !req.body.resumeUrl) {
+      return res.status(400).json({
+        success: false,
+        message: 'Either resume file upload or resume URL is required',
+      });
+    }
+    next();
+  },
   validateRequest(createApplicationSchema),
   applicationsController.applyToJob.bind(applicationsController),
 );

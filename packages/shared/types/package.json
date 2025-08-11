@@ -1,0 +1,20 @@
+{
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "name": "@job-board/shared-types",
+  "description": "Shared TypeScript types for job board frontend and backend",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  },
+  "peerDependencies": {
+    "zod": "^3.22.0"
+  }
+}

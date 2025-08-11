@@ -103,10 +103,11 @@ describe('validateRequest middleware', () => {
   describe('with job creation schema', () => {
     const jobSchema = z.object({
       title: z.string().min(1).max(255),
-      description: z.string().min(1),
+      description: z.any(),
       location: z.string().max(255).optional(),
-      requirements: z.string().optional(),
-      status: z.enum(['active', 'draft']).default('active'),
+      status: z
+        .enum(['active', 'draft', 'reviewing', 'closed'])
+        .default('active'),
     });
 
     it('should validate job creation with all fields', () => {
@@ -217,7 +218,7 @@ describe('validateRequest middleware', () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it('should fail validation with empty description', () => {
+    it('should accept any description format', () => {
       // Arrange
       const middleware = validateRequest(jobSchema);
       const req = mockRequest({
@@ -233,18 +234,8 @@ describe('validateRequest middleware', () => {
       middleware(req, res, next);
 
       // Assert
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        error: 'Validation failed',
-        details: expect.objectContaining({
-          fieldErrors: expect.objectContaining({
-            description: expect.arrayContaining([
-              'String must contain at least 1 character(s)',
-            ]),
-          }),
-        }),
-      });
-      expect(next).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalled();
+      expect(res.status).not.toHaveBeenCalled();
     });
 
     it('should fail validation with invalid status', () => {
@@ -271,7 +262,7 @@ describe('validateRequest middleware', () => {
           fieldErrors: expect.objectContaining({
             status: expect.arrayContaining([
               // eslint-disable-next-line quotes
-              "Invalid enum value. Expected 'active' | 'draft', received 'invalid-status'",
+              "Invalid enum value. Expected 'active' | 'draft' | 'reviewing' | 'closed', received 'invalid-status'",
             ]),
           }),
         }),
@@ -334,7 +325,6 @@ describe('validateRequest middleware', () => {
         details: expect.objectContaining({
           fieldErrors: expect.objectContaining({
             title: expect.any(Array),
-            description: expect.any(Array),
             status: expect.any(Array),
           }),
         }),
@@ -345,11 +335,23 @@ describe('validateRequest middleware', () => {
 
   describe('with application status schema', () => {
     const statusSchema = z.object({
-      status: z.enum(['reviewed', 'accepted', 'rejected']),
+      status: z.enum([
+        'pending',
+        'reviewing',
+        'interviewed',
+        'accepted',
+        'rejected',
+      ]),
     });
 
     it('should validate all valid status values', () => {
-      const validStatuses = ['reviewed', 'accepted', 'rejected'];
+      const validStatuses = [
+        'pending',
+        'reviewing',
+        'interviewed',
+        'accepted',
+        'rejected',
+      ];
 
       validStatuses.forEach((status) => {
         // Arrange

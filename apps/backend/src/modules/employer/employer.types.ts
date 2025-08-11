@@ -1,4 +1,12 @@
 import { z } from 'zod';
+import {
+  APPLICATION_STATUS_VALUES,
+  UpdateApplicationStatusResponse as SharedUpdateApplicationStatusResponse,
+  JobApplicationsResponse as SharedJobApplicationsResponse,
+  EmployerJob as SharedEmployerJob,
+  EmployerJobsResponse as SharedEmployerJobsResponse,
+  EmployerJobResponse,
+} from '@job-board/shared-types';
 
 export const createJobSchema = z.object({
   title: z.string().min(1).max(255),
@@ -15,7 +23,7 @@ export const updateJobSchema = z.object({
 });
 
 export const updateApplicationStatusSchema = z.object({
-  status: z.enum(['reviewed', 'accepted', 'rejected']),
+  status: z.enum(APPLICATION_STATUS_VALUES as [string, ...string[]]),
 });
 
 export const jobParamsSchema = z.object({
@@ -26,49 +34,14 @@ export const applicationParamsSchema = z.object({
   uuid: z.string().uuid(),
 });
 
-export interface EmployerJob {
-  id: number;
-  uuid: string;
-  title: string;
-  description: Record<string, unknown>; // JSON content from block editor
-  location: string | null;
-  status: string;
-  createdAt: Date;
-}
+// Use shared types (re-export for compatibility)
+export type EmployerJob = SharedEmployerJob;
+export type JobApplicationsResponse = SharedJobApplicationsResponse;
+export type EmployerJobsResponse = SharedEmployerJobsResponse;
+export type ApplicationStatusResponse = SharedUpdateApplicationStatusResponse;
 
-export interface JobApplicationWithSeeker {
-  uuid: string;
-  jobId: number;
-  jobSeekerId: number;
-  resumeUrl: string;
-  coverLetter: string | null;
-  status: string;
-  createdAt: Date;
-  applicant: {
-    name: string;
-    email: string;
-    uuid: string;
-  };
-}
-
-export interface EmployerJobsResponse {
-  success: boolean;
-  jobs: EmployerJob[];
-}
-
-export interface JobApplicationsResponse {
-  success: boolean;
-  applications: JobApplicationWithSeeker[];
-}
-
-export interface JobResponse {
-  success: boolean;
-  job?: EmployerJob;
-}
-
-export interface ApplicationStatusResponse {
-  success: boolean;
-}
+// Type aliases for shared types
+export type JobResponse = EmployerJobResponse;
 
 export type CreateJobRequest = z.infer<typeof createJobSchema>;
 export type UpdateJobRequest = z.infer<typeof updateJobSchema>;

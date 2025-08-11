@@ -25,7 +25,7 @@ export class JobsController {
         jobs: jobs.map((job) => ({
           uuid: job.uuid,
           title: job.title,
-          description: job.description,
+          description: job.description as Record<string, unknown>,
           location: job.location,
           status: job.status,
           companyName: job.companyName,
@@ -71,7 +71,7 @@ export class JobsController {
         job: {
           uuid: job.uuid,
           title: job.title,
-          description: job.description,
+          description: job.description as Record<string, unknown>,
           location: job.location,
           status: job.status,
           companyName: job.companyName,

@@ -39,10 +39,20 @@ export class ApplicationsController {
         return res.status(409).json({ success: false });
       }
 
+      // Determine resume URL - use file upload path or provided URL
+      let resumeUrl: string;
+      if (req.file) {
+        resumeUrl = `/uploads/resumes/${req.file.filename}`;
+      } else if (req.body.resumeUrl) {
+        resumeUrl = req.body.resumeUrl;
+      } else {
+        return res.status(400).json({ success: false });
+      }
+
       const application = await ApplicationRepository.create({
         jobId: job.id,
         jobSeekerId: req.user.id,
-        resumeUrl: req.body.resumeUrl,
+        resumeUrl,
         coverLetter: req.body.coverLetter || null,
         status: 'pending',
       });

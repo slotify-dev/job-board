@@ -10,6 +10,7 @@ import {
   JobResponse,
   ApplicationStatusResponse,
 } from './employer.types';
+import { JobStatus, ApplicationStatus } from '@job-board/shared-types';
 import JobRepository from '../../database/repository/job';
 import ApplicationRepository from '../../database/repository/application';
 import EmployerRepository from '../../database/repository/employer';
@@ -43,9 +44,9 @@ export class EmployerController {
           id: job.id,
           uuid: job.uuid,
           title: job.title,
-          description: job.description,
+          description: job.description as Record<string, unknown>,
           location: job.location,
-          status: job.status,
+          status: job.status as JobStatus,
           createdAt: job.createdAt,
         },
       });
@@ -72,9 +73,9 @@ export class EmployerController {
           id: job.id,
           uuid: job.uuid,
           title: job.title,
-          description: job.description,
+          description: job.description as Record<string, unknown>,
           location: job.location,
-          status: job.status,
+          status: job.status as JobStatus,
           createdAt: job.createdAt,
         })),
       });
@@ -117,9 +118,9 @@ export class EmployerController {
           id: updatedJob.id,
           uuid: updatedJob.uuid,
           title: updatedJob.title,
-          description: updatedJob.description,
+          description: updatedJob.description as Record<string, unknown>,
           location: updatedJob.location,
-          status: updatedJob.status,
+          status: updatedJob.status as JobStatus,
           createdAt: updatedJob.createdAt,
         },
       });
@@ -182,17 +183,18 @@ export class EmployerController {
       return res.json({
         success: true,
         applications: applications.map((app) => ({
+          id: app.id,
           uuid: app.uuid,
           jobId: app.jobId,
           jobSeekerId: app.jobSeekerId,
           resumeUrl: app.resumeUrl,
           coverLetter: app.coverLetter,
-          status: app.status,
+          status: app.status as ApplicationStatus,
           createdAt: app.createdAt,
           applicant: {
-            uuid: app.jobSeekerUuid,
-            name: app.jobSeekerName,
-            email: app.jobSeekerEmail,
+            uuid: app.jobSeekerUuid?.toString() || '',
+            name: app.jobSeekerName || '',
+            email: app.jobSeekerEmail || '',
           },
         })),
       });
@@ -232,7 +234,35 @@ export class EmployerController {
         status: req.body.status,
       });
 
-      return res.json({ success: true });
+      const updatedApplication =
+        await ApplicationRepository.findByUuidWithJobSeeker(req.params.uuid);
+
+      if (!updatedApplication) {
+        return res.status(500).json({
+          success: false,
+          message: 'Application updated but could not retrieve updated data',
+        });
+      }
+
+      return res.json({
+        success: true,
+        application: {
+          id: updatedApplication.id,
+          uuid: updatedApplication.uuid,
+          jobId: updatedApplication.jobId,
+          jobSeekerId: updatedApplication.jobSeekerId,
+          resumeUrl: updatedApplication.resumeUrl,
+          coverLetter: updatedApplication.coverLetter,
+          status: updatedApplication.status as ApplicationStatus,
+          createdAt: updatedApplication.createdAt,
+          applicant: {
+            uuid: updatedApplication.jobSeekerUuid?.toString() || '',
+            name: updatedApplication.jobSeekerName || '',
+            email: updatedApplication.jobSeekerEmail || '',
+          },
+        },
+        message: 'Application status updated successfully',
+      });
     } catch (error) {
       console.error('Error updating application status:', error);
       return res.status(500).json({ success: false });

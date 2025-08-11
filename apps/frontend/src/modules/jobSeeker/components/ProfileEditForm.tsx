@@ -21,7 +21,7 @@ export function ProfileEditForm({ onCancel, onSaved }: ProfileEditFormProps) {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  // eslint-disable-next-line no-undef
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   useEffect(() => {

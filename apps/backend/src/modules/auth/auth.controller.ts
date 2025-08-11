@@ -141,8 +141,8 @@ export class AuthController {
           if (req.body.role === 'employer') {
             await EmployerRepository.create({
               userId: user.id,
-              companyName: `${req.body.email.split('@')[0]}'s Company`,
-              contactPerson: req.body.email.split('@')[0],
+              companyName: `${req.body.email?.split('@')[0] || 'Company'}'s Company`,
+              contactPerson: req.body.email?.split('@')[0] || 'Contact',
               companyWebsite: null,
             });
           }
