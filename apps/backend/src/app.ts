@@ -25,8 +25,8 @@ export const createApp = (): Application => {
       credentials: true,
       optionsSuccessStatus: 204,
       origin: ['http://localhost:5173'],
-      methods: ['GET', 'POST', 'PUT', 'DELETE'],
       allowedHeaders: ['Content-Type', 'Authorization'],
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     }),
   );
 
