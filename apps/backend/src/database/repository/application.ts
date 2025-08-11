@@ -20,6 +20,14 @@ export interface ApplicationWithJobSeeker extends Application {
   jobSeekerEmail: string | null;
 }
 
+export interface ApplicationWithJobAndJobSeeker extends Application {
+  jobTitle: string | null;
+  jobUuid: string | null;
+  jobSeekerName: string | null;
+  jobSeekerEmail: string | null;
+  jobSeekerUuid: number | null;
+}
+
 export default class ApplicationRepository {
   static async findByUuid(uuid: string): Promise<Application | null> {
     try {
@@ -121,6 +129,39 @@ export default class ApplicationRepository {
       return result;
     } catch (error) {
       console.error('Error finding applications by job ID:', error);
+      throw error;
+    }
+  }
+
+  static async findByEmployerId(
+    employerId: number,
+  ): Promise<ApplicationWithJobAndJobSeeker[]> {
+    try {
+      const result = await db
+        .select({
+          id: applications.id,
+          uuid: applications.uuid,
+          jobId: applications.jobId,
+          jobSeekerId: applications.jobSeekerId,
+          resumeUrl: applications.resumeUrl,
+          coverLetter: applications.coverLetter,
+          status: applications.status,
+          createdAt: applications.createdAt,
+          jobTitle: jobs.title,
+          jobUuid: jobs.uuid,
+          jobSeekerName: jobSeekers.fullName,
+          jobSeekerEmail: jobSeekers.email,
+          jobSeekerUuid: jobSeekers.userId,
+        })
+        .from(applications)
+        .leftJoin(jobs, eq(applications.jobId, jobs.id))
+        .leftJoin(jobSeekers, eq(applications.jobSeekerId, jobSeekers.userId))
+        .where(eq(jobs.employerId, employerId))
+        .orderBy(desc(applications.createdAt));
+
+      return result;
+    } catch (error) {
+      console.error('Error finding applications by employer ID:', error);
       throw error;
     }
   }

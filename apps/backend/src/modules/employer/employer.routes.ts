@@ -44,6 +44,11 @@ router.delete(
 
 // Employer application management routes (employer role required)
 router.get(
+  '/applications',
+  employerController.getAllApplications.bind(employerController),
+);
+
+router.get(
   '/jobs/:uuid/applications',
   validateParams(jobParamsSchema),
   employerController.getJobApplications.bind(employerController),

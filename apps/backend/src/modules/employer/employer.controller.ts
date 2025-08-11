@@ -204,6 +204,44 @@ export class EmployerController {
     }
   }
 
+  async getAllApplications(req: Request, res: Response) {
+    try {
+      if (!req.user || req.user.role !== 'employer') {
+        return res.status(403).json({ success: false, applications: [] });
+      }
+
+      const applications = await ApplicationRepository.findByEmployerId(
+        req.user.id,
+      );
+
+      return res.json({
+        success: true,
+        applications: applications.map((app) => ({
+          id: app.id,
+          uuid: app.uuid,
+          jobId: app.jobId,
+          jobSeekerId: app.jobSeekerId,
+          resumeUrl: app.resumeUrl,
+          coverLetter: app.coverLetter,
+          status: app.status as ApplicationStatus,
+          createdAt: app.createdAt,
+          job: {
+            title: app.jobTitle || '',
+            uuid: app.jobUuid || '',
+          },
+          applicant: {
+            uuid: app.jobSeekerUuid?.toString() || '',
+            name: app.jobSeekerName || '',
+            email: app.jobSeekerEmail || '',
+          },
+        })),
+      });
+    } catch (error) {
+      console.error('Error fetching all applications:', error);
+      return res.status(500).json({ success: false, applications: [] });
+    }
+  }
+
   async updateApplicationStatus(
     req: Request<
       ApplicationParams,

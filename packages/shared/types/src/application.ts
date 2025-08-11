@@ -85,3 +85,14 @@ export interface JobApplicationsResponseExtended
   total: number;
   jobTitle: string;
 }
+
+// All applications response (for employer dashboard)
+export interface AllApplicationsResponse {
+  success: boolean;
+  applications: (JobApplicationWithSeeker & {
+    job: {
+      title: string;
+      uuid: string;
+    };
+  })[];
+}

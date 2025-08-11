@@ -1,7 +1,81 @@
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { Layout } from '../../../shared/components/layout';
+import { applicationReviewService } from '../../application-review/services/applicationReviewService';
+import { ApplicationStatusBadge } from '../../application-review/components/ApplicationStatusBadge';
+import type { AllApplicationsResponse } from '@job-board/shared-types';
 
 export function CandidatesPage() {
+  const [applications, setApplications] = useState<
+    AllApplicationsResponse['applications']
+  >([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchApplications = async () => {
+      try {
+        setLoading(true);
+        const response = await applicationReviewService.getAllApplications();
+        if (response.success) {
+          setApplications(response.applications);
+        } else {
+          setError('Failed to fetch applications');
+        }
+      } catch (err) {
+        setError('Error fetching applications');
+        console.error('Error fetching applications:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApplications();
+  }, []);
+
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }).format(new Date(date));
+  };
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <div className="loading-spinner mx-auto mb-4"></div>
+              <p className="text-primary-600">Loading applications...</p>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="card">
+            <div className="text-center py-12">
+              <p className="text-red-600 mb-4">{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="btn-primary"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
@@ -18,35 +92,110 @@ export function CandidatesPage() {
           </p>
         </div>
 
-        <div className="card">
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg
-                className="w-8 h-8 text-primary-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
+        {applications.length === 0 ? (
+          <div className="card">
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg
+                  className="w-8 h-8 text-primary-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-black mb-2">
+                No Applications Yet
+              </h3>
+              <p className="text-primary-600 mb-6">
+                You haven&apos;t received any applications yet. Make sure your
+                job postings are active to attract candidates.
+              </p>
+              <Link to="/employer/dashboard" className="btn-primary">
+                View My Job Posts
+              </Link>
             </div>
-            <h3 className="text-lg font-medium text-black mb-2">
-              Candidates Overview
-            </h3>
-            <p className="text-primary-600 mb-6">
-              To review applications for a specific job, go to your job posts
-              and click &quot;View Applications&quot; on any job listing.
-            </p>
-            <Link to="/employer/dashboard" className="btn-primary">
-              View My Job Posts
-            </Link>
           </div>
-        </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="bg-white rounded-lg border border-primary-200 p-4">
+              <h3 className="font-medium text-black mb-4">
+                {applications.length} Application
+                {applications.length !== 1 ? 's' : ''}
+              </h3>
+
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-primary-200">
+                      <th className="text-left py-3 px-2 text-sm font-medium text-primary-700">
+                        Candidate
+                      </th>
+                      <th className="text-left py-3 px-2 text-sm font-medium text-primary-700">
+                        Job Position
+                      </th>
+                      <th className="text-left py-3 px-2 text-sm font-medium text-primary-700">
+                        Status
+                      </th>
+                      <th className="text-left py-3 px-2 text-sm font-medium text-primary-700">
+                        Applied
+                      </th>
+                      <th className="text-left py-3 px-2 text-sm font-medium text-primary-700">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {applications.map((application) => (
+                      <tr
+                        key={application.uuid}
+                        className="border-b border-primary-100 hover:bg-primary-50"
+                      >
+                        <td className="py-3 px-2">
+                          <div>
+                            <p className="font-medium text-black">
+                              {application.applicant.name}
+                            </p>
+                            <p className="text-sm text-primary-600">
+                              {application.applicant.email}
+                            </p>
+                          </div>
+                        </td>
+                        <td className="py-3 px-2">
+                          <p className="text-black font-medium">
+                            {application.job.title}
+                          </p>
+                        </td>
+                        <td className="py-3 px-2">
+                          <ApplicationStatusBadge status={application.status} />
+                        </td>
+                        <td className="py-3 px-2">
+                          <p className="text-sm text-primary-600">
+                            {formatDate(application.createdAt)}
+                          </p>
+                        </td>
+                        <td className="py-3 px-2">
+                          <Link
+                            to={`/employer/jobs/${application.job.uuid}/applications`}
+                            className="text-primary-600 hover:text-primary-800 text-sm font-medium"
+                          >
+                            View Details →
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="mt-8">
           <h2 className="text-lg font-medium text-black mb-4">Quick Actions</h2>
