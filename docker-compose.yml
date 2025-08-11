@@ -61,6 +61,7 @@ services:
       - '${BACKEND_PORT:-3000}:${BACKEND_PORT:-3000}'
     volumes:
       - ./apps/backend/src:/app/apps/backend/src:rw
+      - ./apps/backend/uploads:/app/apps/backend/uploads:rw
       - ./apps/backend/drizzle.config.ts:/app/apps/backend/drizzle.config.ts:ro
     depends_on:
       postgres:

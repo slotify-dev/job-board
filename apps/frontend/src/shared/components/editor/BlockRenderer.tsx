@@ -2,7 +2,7 @@ import React from 'react';
 import type { OutputData } from '../../types/editorTypes';
 
 interface BlockRendererProps {
-  data: OutputData;
+  data: OutputData | string | null | undefined;
   className?: string;
 }
 
@@ -12,8 +12,29 @@ interface Block {
 }
 
 const renderBlock = (block: Block, index: number): JSX.Element => {
+  // Validate block structure
+  if (!block || typeof block.type !== 'string' || !block.data) {
+    console.warn('Invalid block structure:', block);
+    return (
+      <div
+        key={index}
+        className="mb-4 p-3 border border-yellow-200 bg-yellow-50 rounded-md"
+      >
+        <p className="text-yellow-800 text-sm">Invalid block structure</p>
+      </div>
+    );
+  }
+
   switch (block.type) {
     case 'header': {
+      const text = block.data.text;
+      if (typeof text !== 'string') {
+        return (
+          <div key={index} className="mb-4 text-red-500">
+            Invalid header content
+          </div>
+        );
+      }
       const HeaderTag =
         `h${(block.data.level as number) || 2}` as keyof JSX.IntrinsicElements;
       return (
@@ -27,21 +48,38 @@ const renderBlock = (block: Block, index: number): JSX.Element => {
                 : 'text-lg'
           }`}
         >
-          {block.data.text as string}
+          {text}
         </HeaderTag>
       );
     }
 
-    case 'paragraph':
+    case 'paragraph': {
+      const text = block.data.text;
+      if (typeof text !== 'string') {
+        return (
+          <div key={index} className="mb-4 text-red-500">
+            Invalid paragraph content
+          </div>
+        );
+      }
       return (
         <p
           key={index}
           className="text-primary-800 mb-4 leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: block.data.text as string }}
+          dangerouslySetInnerHTML={{ __html: text }}
         />
       );
+    }
 
     case 'list': {
+      const items = block.data.items;
+      if (!Array.isArray(items)) {
+        return (
+          <div key={index} className="mb-4 text-red-500">
+            Invalid list content
+          </div>
+        );
+      }
       const ListTag = (block.data.style as string) === 'ordered' ? 'ol' : 'ul';
       return (
         <ListTag
@@ -52,36 +90,80 @@ const renderBlock = (block: Block, index: number): JSX.Element => {
               : 'list-disc list-inside'
           }`}
         >
-          {(block.data.items as string[]).map(
-            (item: string, itemIndex: number) => (
+          {items.map((item: unknown, itemIndex: number) => {
+            let itemText: string = '';
+
+            // Handle different item formats
+            if (typeof item === 'string') {
+              itemText = item;
+            } else if (typeof item === 'object' && item !== null) {
+              // Handle EditorJS list item objects
+              const itemObj = item as Record<string, unknown>;
+              if (typeof itemObj.content === 'string') {
+                itemText = itemObj.content;
+              } else if (typeof itemObj.text === 'string') {
+                itemText = itemObj.text;
+              } else {
+                // Try to extract any string value from the object
+                const stringValues = Object.values(itemObj).filter(
+                  (v): v is string => typeof v === 'string',
+                );
+                if (stringValues.length > 0) {
+                  itemText = stringValues[0];
+                }
+              }
+            }
+
+            // If we still don't have text, try to stringify the item safely
+            if (!itemText && item !== null && item !== undefined) {
+              try {
+                itemText = String(item);
+                // Avoid displaying [object Object]
+                if (itemText === '[object Object]') {
+                  itemText = JSON.stringify(item);
+                }
+              } catch {
+                itemText = 'Invalid list item';
+              }
+            }
+
+            return (
               <li
                 key={itemIndex}
                 className="mb-1"
-                dangerouslySetInnerHTML={{ __html: item }}
+                dangerouslySetInnerHTML={{
+                  __html: itemText || 'Empty list item',
+                }}
               />
-            ),
-          )}
+            );
+          })}
         </ListTag>
       );
     }
 
-    case 'quote':
+    case 'quote': {
+      const text = block.data.text;
+      if (typeof text !== 'string') {
+        return (
+          <div key={index} className="mb-4 text-red-500">
+            Invalid quote content
+          </div>
+        );
+      }
       return (
         <blockquote
           key={index}
           className="border-l-4 border-primary-300 pl-4 py-2 mb-4 italic text-primary-700 bg-primary-50 rounded-r-md"
         >
-          <p
-            className="mb-2"
-            dangerouslySetInnerHTML={{ __html: block.data.text as string }}
-          />
-          {block.data.caption && (
+          <p className="mb-2" dangerouslySetInnerHTML={{ __html: text }} />
+          {block.data.caption && typeof block.data.caption === 'string' && (
             <cite className="text-sm text-primary-600 not-italic">
-              — {block.data.caption as string}
+              — {block.data.caption}
             </cite>
           )}
         </blockquote>
       );
+    }
 
     case 'delimiter':
       return (
@@ -182,7 +264,36 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   data,
   className = '',
 }) => {
-  if (!data || !data.blocks || data.blocks.length === 0) {
+  // Handle null/undefined data
+  if (!data) {
+    return (
+      <div className={`text-primary-500 italic ${className}`}>
+        No content available
+      </div>
+    );
+  }
+
+  // Handle string data (legacy format)
+  if (typeof data === 'string') {
+    return (
+      <div className={`block-renderer ${className}`}>
+        <p className="text-primary-800 mb-4 leading-relaxed">{data}</p>
+      </div>
+    );
+  }
+
+  // Handle malformed data or objects that aren't proper OutputData
+  if (!data.blocks || !Array.isArray(data.blocks)) {
+    console.warn('Invalid block data structure:', data);
+    return (
+      <div className={`text-primary-500 italic ${className}`}>
+        Invalid content format
+      </div>
+    );
+  }
+
+  // Handle empty blocks array
+  if (data.blocks.length === 0) {
     return (
       <div className={`text-primary-500 italic ${className}`}>
         No content available
@@ -192,7 +303,23 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
 
   return (
     <div className={`block-renderer ${className}`}>
-      {data.blocks.map((block, index) => renderBlock(block, index))}
+      {data.blocks.map((block, index) => {
+        try {
+          return renderBlock(block, index);
+        } catch (error) {
+          console.warn(`Error rendering block ${index}:`, error);
+          return (
+            <div
+              key={index}
+              className="mb-4 p-3 border border-red-200 bg-red-50 rounded-md"
+            >
+              <p className="text-red-800 text-sm">
+                Error rendering content block
+              </p>
+            </div>
+          );
+        }
+      })}
     </div>
   );
 };
