@@ -1,6 +1,7 @@
-# 🧪 One-Step Dev Setup with Docker
+# Job Board Application
 
 This monorepo provides a complete full-stack development environment using Docker with hot reload for both frontend and backend.
+It is designed for a Job Board Application app.
 
 ## Prerequisites
 
@@ -13,7 +14,43 @@ This monorepo provides a complete full-stack development environment using Docke
 cp apps/backend/.env.example apps/backend/.env
 cp apps/frontend/.env.example apps/frontend/.env
 
+# Install dependencies for all workspaces
+bun install
+
 # build/start docker services
+docker-compose up --build
+
+# seeding local data
+docker exec job-board-backend bun src/database/seed.ts
+
+# View all logs
+docker-compose logs -f
+
+# View specific service logs
+docker-compose logs -f backend
+docker-compose logs -f frontend
+
+# Restart specific service
+docker-compose restart backend
+docker-compose restart frontend
+
+# Access service containers
+docker-compose exec backend sh
+docker-compose exec frontend sh
+
+# Stop all services
+docker-compose down
+
+# Rebuild and restart
+docker-compose up --build
+
+# Clean build (removes cached layers)
+# When there are errors with build image
+docker-compose build --no-cache
+
+# Reset everything
+docker-compose down -v
+docker system prune -a
 docker-compose up --build
 ```
 
@@ -40,42 +77,6 @@ Both frontend and backend support hot reload out of the box:
 - **Frontend**: Uses Vite dev server with HMR (Hot Module Replacement)
 - **API Proxy**: Frontend automatically proxies `/api` requests to backend
 
-## Development Workflow
-
-```bash
-# View all logs
-docker-compose logs -f
-
-# View specific service logs
-docker-compose logs -f backend
-docker-compose logs -f frontend
-
-# Restart specific service
-docker-compose restart backend
-docker-compose restart frontend
-
-# Access service containers
-docker-compose exec backend sh
-docker-compose exec frontend sh
-
-# Stop all services
-docker-compose down
-
-# Rebuild and restart
-docker-compose up --build
-```
-
-## 🗃️ Database Setup & Seeding
-
-### Quick Database Seeding
-
-After starting the Docker containers, seed the database with realistic test data:
-
-```bash
-# Seed database with 25 employers, 50 job seekers, 50 jobs, and applications
-docker exec job-board-backend bun src/database/seed.ts
-```
-
 **Test Login Credentials:**
 
 - **Employers**: `employer1@example.com` to `employer25@example.com`
@@ -96,29 +97,6 @@ lsof -i :3000
 # Kill processes or edit docker-compose.yml to use different ports
 ```
 
-### Docker Build Errors
-
-```bash
-# Clean build (removes cached layers)
-docker-compose build --no-cache
-
-# Reset everything
-docker-compose down -v
-docker system prune -a
-docker-compose up --build
-```
-
-### Database Connection Issues
-
-```bash
-# Check database health
-docker-compose exec postgres pg_isready -U jobboard_user -d jobboard
-
-# Reset database
-docker-compose down -v
-docker-compose up --build
-```
-
 ### Frontend Can't Connect to Backend
 
 1. Ensure backend is running: `http://localhost:3000/api/health`
@@ -132,9 +110,6 @@ This project uses ESLint and Prettier for code quality and formatting, with auto
 ### Available Scripts
 
 ```bash
-# Start both frontend and backend in development mode
-bun run dev
-
 # Run ESLint on all TypeScript files
 bun run lint
 
@@ -143,27 +118,21 @@ bun run lint:md
 
 # Format all files with Prettier
 bun run format
-
-# Install dependencies for all workspaces
-bun install
 ```
 
 ### Code Quality Checks
 
-#### Manual Linting
+Always ensure your code passes quality checks:
 
 ```bash
-# Check for linting errors
-bun run lint
-
 # Auto-fix linting issues
-bunx eslint . --ext .ts,.tsx --fix
+bun run format:all
 
-# Auto-fix markdown issues
-bunx markdownlint-cli2 --fix '**/*.md' '!**/node_modules/**'
+# fixing markdown issues
+bun run lint:md:fix
 
-# Format code with Prettier
-bun run format
+# Or let pre-commit hooks handle it automatically
+git add . && git commit -m "your message"
 ```
 
 #### Pre-commit Hooks
@@ -174,32 +143,6 @@ The project automatically runs code quality checks before each commit:
 - Markdownlint with auto-fix
 - Prettier formatting
 - Only staged files are processed
-
-#### ESLint Configuration
-
-- **No `any` types**: Enforces explicit typing
-- **Import ordering**: Automatic import organization
-- **TypeScript strict rules**: Enhanced type checking
-- **React best practices**: React-specific linting rules
-
-#### Prettier Configuration
-
-- **2-space indentation**
-- **Single quotes**
-- **Trailing commas**
-- **80 character line width**
-
-### Before Pushing Code
-
-Always ensure your code passes quality checks:
-
-```bash
-# Run all checks
-bun run lint && bun run lint:md && bun run format
-
-# Or let pre-commit hooks handle it automatically
-git add . && git commit -m "your message"
-```
 
 ### Troubleshooting
 
