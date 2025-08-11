@@ -129,7 +129,7 @@ export function AppRoutes() {
         }
       />
       <Route
-        path="/employer/job/:jobId/applications"
+        path="/employer/jobs/:jobId/applications"
         element={
           <ProtectedRoute roles={['employer']}>
             <ApplicationReviewPage />
