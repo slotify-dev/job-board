@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import path from 'path';
 import fs from 'fs';
+import mime from 'mime-types';
 
 export interface FileUploadResponse {
   success: boolean;
@@ -52,6 +53,59 @@ export class UploadController {
       return res.status(500).json({
         success: false,
         message: 'File upload failed',
+      });
+    }
+  }
+
+  async serveResume(req: Request, res: Response) {
+    try {
+      const { filename } = req.params;
+      const { download } = req.query;
+
+      if (!filename) {
+        return res.status(400).json({
+          success: false,
+          message: 'Filename required',
+        });
+      }
+
+      const filePath = path.join(process.cwd(), 'uploads', 'resumes', filename);
+
+      // Check if file exists
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({
+          success: false,
+          message: 'File not found',
+        });
+      }
+
+      // Get file stats
+      const stats = fs.statSync(filePath);
+      const mimeType = mime.lookup(filePath) || 'application/octet-stream';
+
+      // Set appropriate headers
+      res.setHeader('Content-Type', mimeType);
+      res.setHeader('Content-Length', stats.size);
+
+      if (download === 'true') {
+        // Force download
+        res.setHeader(
+          'Content-Disposition',
+          `attachment; filename="${filename}"`,
+        );
+      } else {
+        // Inline viewing (for PDFs in iframe)
+        res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+      }
+
+      // Stream the file
+      const fileStream = fs.createReadStream(filePath);
+      fileStream.pipe(res);
+    } catch (error) {
+      console.error('Error serving resume:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'File serving failed',
       });
     }
   }

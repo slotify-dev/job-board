@@ -40,7 +40,7 @@ export const JobDetailsPage = () => {
 
   const handleApplicationSuccess = () => {
     // Application success is now handled by the form component
-    setActiveTab('description');
+    // Don't automatically switch tabs - let user stay on Apply tab to see success message
   };
 
   if (isLoading) {

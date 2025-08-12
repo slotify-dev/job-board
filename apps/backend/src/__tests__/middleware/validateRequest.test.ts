@@ -261,7 +261,6 @@ describe('validateRequest middleware', () => {
         details: expect.objectContaining({
           fieldErrors: expect.objectContaining({
             status: expect.arrayContaining([
-              // eslint-disable-next-line quotes
               "Invalid enum value. Expected 'active' | 'draft' | 'reviewing' | 'closed', received 'invalid-status'",
             ]),
           }),

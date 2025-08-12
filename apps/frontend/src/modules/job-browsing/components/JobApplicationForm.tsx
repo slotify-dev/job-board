@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { useApplyToJob } from '../hooks/useApplications';
+import { useApplyToJob, useMyApplications } from '../hooks/useApplications';
 
 interface JobApplicationFormProps {
   jobUuid: string;
@@ -18,8 +18,13 @@ export const JobApplicationForm = ({
   jobUuid,
   jobTitle,
   companyName,
-  onSuccess,
-}: JobApplicationFormProps) => {
+}: Omit<JobApplicationFormProps, 'onSuccess'>) => {
+  const { data: myApplications } = useMyApplications();
+
+  // Check if user has already applied to this job
+  const hasAlreadyApplied = myApplications?.applications?.some(
+    (app) => app.jobUuid === jobUuid,
+  );
   const [formData, setFormData] = useState<ApplicationFormData>({
     resumeFile: null,
     resumeUrl: '',
@@ -29,7 +34,9 @@ export const JobApplicationForm = ({
   const [notification, setNotification] = useState<{
     type: 'success' | 'error' | 'info';
     message: string;
+    persistent?: boolean;
   } | null>(null);
+  const [isApplicationSubmitted, setIsApplicationSubmitted] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const applyMutation = useApplyToJob();
@@ -37,9 +44,12 @@ export const JobApplicationForm = ({
   const showNotification = (
     type: 'success' | 'error' | 'info',
     message: string,
+    persistent = false,
   ) => {
-    setNotification({ type, message });
-    setTimeout(() => setNotification(null), 5000);
+    setNotification({ type, message, persistent });
+    if (!persistent) {
+      setTimeout(() => setNotification(null), 5000);
+    }
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,19 +116,58 @@ export const JobApplicationForm = ({
       setFormData({ resumeFile: null, resumeUrl: '', coverLetter: '' });
       if (fileInputRef.current) fileInputRef.current.value = '';
 
-      showNotification('success', 'Application submitted successfully!');
+      setIsApplicationSubmitted(true);
+      showNotification(
+        'success',
+        'Application submitted successfully! Your application has been sent to the employer and you should hear back soon.',
+        true,
+      );
 
-      if (onSuccess) {
-        onSuccess();
-      }
+      // Don't call onSuccess to avoid switching tabs automatically
     } catch (error) {
       console.error('Application failed:', error);
-      showNotification(
-        'error',
-        'Failed to submit application. Please try again.',
-      );
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Failed to submit application. Please try again.';
+      showNotification('error', errorMessage);
     }
   };
+
+  // Show already applied message if user has applied
+  if (hasAlreadyApplied) {
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="text-center py-8">
+          <div className="mb-4">
+            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+              <svg
+                className="w-8 h-8 text-green-600"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            Application Already Submitted
+          </h3>
+          <p className="text-gray-600 mb-4">
+            You have already applied to this position. You can track your
+            application status in your dashboard.
+          </p>
+          <a href="/my-applications" className="btn-primary">
+            View My Applications
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -135,7 +184,7 @@ export const JobApplicationForm = ({
       {/* Notification */}
       {notification && (
         <div
-          className={`mb-4 p-4 rounded-md ${
+          className={`mb-4 p-4 rounded-md flex items-start gap-3 ${
             notification.type === 'success'
               ? 'bg-green-50 text-green-800 border border-green-200'
               : notification.type === 'error'
@@ -143,7 +192,69 @@ export const JobApplicationForm = ({
                 : 'bg-blue-50 text-blue-800 border border-blue-200'
           }`}
         >
-          {notification.message}
+          <div className="flex-shrink-0">
+            {notification.type === 'success' && (
+              <svg
+                className="w-5 h-5 text-green-600"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            )}
+            {notification.type === 'error' && (
+              <svg
+                className="w-5 h-5 text-red-600"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            )}
+            {notification.type === 'info' && (
+              <svg
+                className="w-5 h-5 text-blue-600"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            )}
+          </div>
+          <div className="flex-1">
+            <p className="font-medium">{notification.message}</p>
+            {notification.persistent && notification.type === 'success' && (
+              <p className="text-sm mt-1 opacity-80">
+                You can continue browsing or return to the job listings.
+              </p>
+            )}
+          </div>
+          {notification.persistent && (
+            <button
+              onClick={() => setNotification(null)}
+              className="flex-shrink-0 text-gray-400 hover:text-gray-600"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          )}
         </div>
       )}
 
@@ -255,13 +366,19 @@ export const JobApplicationForm = ({
 
         {/* Submit Button */}
         <div>
-          <button
-            type="submit"
-            disabled={applyMutation.isPending}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {applyMutation.isPending ? 'Submitting...' : 'Submit Application'}
-          </button>
+          {isApplicationSubmitted ? (
+            <div className="w-full bg-green-100 text-green-800 py-3 px-4 rounded-md text-center font-medium border border-green-200">
+              ✓ Application Successfully Submitted!
+            </div>
+          ) : (
+            <button
+              type="submit"
+              disabled={applyMutation.isPending}
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {applyMutation.isPending ? 'Submitting...' : 'Submit Application'}
+            </button>
+          )}
         </div>
       </form>
     </div>

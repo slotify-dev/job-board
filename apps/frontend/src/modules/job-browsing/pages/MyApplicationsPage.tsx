@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useMyApplications } from '../hooks/useApplications';
 import { Layout } from '../../../shared/components/layout';
+import { ResumeViewer } from '../../../components/ResumeViewer';
 import type { ApplicationWithJob } from '../types/application.types';
 
 export const MyApplicationsPage = () => {
@@ -156,18 +157,11 @@ export const MyApplicationsPage = () => {
                         View Job
                       </button>
                       {application.resumeUrl && (
-                        <a
-                          href={
-                            application.resumeUrl.startsWith('/')
-                              ? `${window.location.origin}${application.resumeUrl}`
-                              : application.resumeUrl
-                          }
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <ResumeViewer
+                          resumeUrl={application.resumeUrl}
+                          applicantName="Your Resume"
                           className="px-4 py-2 border border-primary-300 text-primary-700 rounded-md hover:bg-primary-50 transition-colors text-sm"
-                        >
-                          View Resume
-                        </a>
+                        />
                       )}
                     </div>
                   </div>

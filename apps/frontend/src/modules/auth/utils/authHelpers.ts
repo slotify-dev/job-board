@@ -37,7 +37,6 @@ export const registerSchema = z
     role: z.enum(['job_seeker', 'employer']),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    // eslint-disable-next-line quotes
     message: "Passwords don't match",
     path: ['confirmPassword'],
   });

@@ -37,7 +37,17 @@ export const applicationService = {
     );
 
     if (!response.ok) {
-      throw new Error(`Failed to apply to job: ${response.statusText}`);
+      if (response.status === 409) {
+        throw new Error('You have already applied to this job.');
+      } else if (response.status === 403) {
+        throw new Error('Only job seekers can apply to jobs.');
+      } else if (response.status === 404) {
+        throw new Error('This job is no longer available.');
+      } else if (response.status === 400) {
+        throw new Error('Please provide a resume to apply.');
+      } else {
+        throw new Error(`Failed to apply to job: ${response.statusText}`);
+      }
     }
 
     return response.json();

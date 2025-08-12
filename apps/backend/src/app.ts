@@ -20,7 +20,22 @@ import { globalRateLimit } from './middleware/rateLimiters.js';
 export const createApp = (): Application => {
   const app = express();
 
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          fontSrc: ["'self'", 'https:', 'data:'],
+          imgSrc: ["'self'", 'data:'],
+          scriptSrc: ["'self'"],
+          styleSrc: ["'self'", 'https:', "'unsafe-inline'"],
+          objectSrc: ["'none'"],
+          upgradeInsecureRequests: [],
+        },
+      },
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
   app.use(
     cors({
       credentials: true,
@@ -46,8 +61,20 @@ export const createApp = (): Application => {
   // Logging middleware
   app.use(morgan(isDevelopment ? 'dev' : 'combined'));
 
-  // Serve uploaded files
-  app.use('/uploads', express.static('uploads'));
+  // Serve uploaded files with headers optimized for PDF viewing in iframes
+  app.use(
+    '/uploads',
+    (req, res, next) => {
+      // Set headers for PDF files to allow iframe embedding
+      if (req.path.includes('.pdf')) {
+        res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Cache-Control', 'public, max-age=31536000');
+      }
+      next();
+    },
+    express.static('uploads'),
+  );
 
   // Routes
   app.use('/api', healthRoutes);

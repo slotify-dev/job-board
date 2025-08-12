@@ -1,4 +1,3 @@
-/* eslint-disable quotes */
 import { describe, it, expect } from '@jest/globals';
 import {
   createJobSchema,

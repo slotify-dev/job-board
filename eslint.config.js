@@ -4,7 +4,6 @@ import typescriptParser from '@typescript-eslint/parser';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import importPlugin from 'eslint-plugin-import';
-import prettier from 'eslint-plugin-prettier';
 
 export default [
   {
@@ -47,7 +46,6 @@ export default [
       react: react,
       'react-hooks': reactHooks,
       import: importPlugin,
-      prettier: prettier,
     },
     settings: {
       react: {
@@ -63,7 +61,6 @@ export default [
       ...typescriptEslint.configs.recommended.rules,
       ...react.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
-      ...prettier.configs.recommended.rules,
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
@@ -71,10 +68,6 @@ export default [
       'import/order': 'off',
       'react/prop-types': 'off',
       'react/react-in-jsx-scope': 'off',
-      semi: ['error', 'always'],
-      quotes: ['error', 'single'],
-      'comma-dangle': ['error', 'always-multiline'],
-      'prettier/prettier': 'error',
     },
   },
   {
@@ -134,6 +127,7 @@ export default [
         HTMLTextAreaElement: 'readonly',
         HTMLButtonElement: 'readonly',
         HTMLElement: 'readonly',
+        HTMLIFrameElement: 'readonly',
         Event: 'readonly',
         MouseEvent: 'readonly',
         File: 'readonly',

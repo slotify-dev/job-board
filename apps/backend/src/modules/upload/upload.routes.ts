@@ -6,19 +6,24 @@ import authMiddleware from '../../middleware/auth';
 const router = Router();
 const uploadController = new UploadController();
 
-// All upload routes require authentication
-router.use(authMiddleware);
-
-// Upload resume file
+// Upload resume file (requires auth)
 router.post(
   '/resume',
+  authMiddleware,
   uploadResume,
   uploadController.uploadResume.bind(uploadController),
 );
 
-// Delete uploaded resume
+// Serve resume file (public access for viewing)
+router.get(
+  '/resume/:filename',
+  uploadController.serveResume.bind(uploadController),
+);
+
+// Delete uploaded resume (requires auth)
 router.delete(
   '/resume/:filename',
+  authMiddleware,
   uploadController.deleteResume.bind(uploadController),
 );
 
