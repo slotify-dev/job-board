@@ -55,7 +55,7 @@ export const employerJobService = {
           title: jobData.title,
           description: jobData.description,
           location: jobData.location,
-          requirements: jobData.requirements,
+          status: jobData.status,
         }),
       },
     );

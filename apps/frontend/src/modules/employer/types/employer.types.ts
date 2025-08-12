@@ -9,7 +9,11 @@ import type {
 
 // Re-export shared types
 export type CreateJobRequest = SharedCreateJobRequest;
-export type UpdateJobRequest = SharedUpdateJobRequest;
+
+// Frontend UpdateJobRequest includes uuid for routing
+export interface UpdateJobRequest extends SharedUpdateJobRequest {
+  uuid: string;
+}
 
 // Frontend EmployerJob extends shared type with additional fields
 export interface EmployerJob extends SharedEmployerJob {
