@@ -121,7 +121,7 @@ export function AppRoutes() {
         }
       />
       <Route
-        path="/employer/edit-job/:jobId"
+        path="/employer/edit-job/:uuid"
         element={
           <ProtectedRoute roles={['employer']}>
             <EditJobPage />

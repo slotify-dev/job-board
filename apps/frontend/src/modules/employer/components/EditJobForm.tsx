@@ -19,10 +19,10 @@ export function EditJobForm({
   onSuccess,
 }: EditJobFormProps) {
   const navigate = useNavigate();
-  const { jobId } = useParams<{ jobId: string }>();
+  const { uuid } = useParams<{ uuid: string }>();
   const { updateJob } = useEmployerJobs();
   const [loading, setLoading] = useState(false);
-  const [fetchingJob, setFetchingJob] = useState(!propJob && !!jobId);
+  const [fetchingJob, setFetchingJob] = useState(!propJob && !!uuid);
   const [job, setJob] = useState<EmployerJob | null>(propJob || null);
   const [formData, setFormData] = useState<JobFormData>({
     title: '',
@@ -41,11 +41,11 @@ export function EditJobForm({
   }, [onCancel, navigate]);
 
   const fetchJob = useCallback(async () => {
-    if (!jobId) return;
+    if (!uuid) return;
 
     try {
       setFetchingJob(true);
-      const response = await employerJobService.getJobById(jobId);
+      const response = await employerJobService.getJobById(uuid);
       if (response.success && response.job) {
         setJob(response.job);
         setFormData({
@@ -61,7 +61,7 @@ export function EditJobForm({
     } finally {
       setFetchingJob(false);
     }
-  }, [jobId, handleCancel]);
+  }, [uuid, handleCancel]);
 
   useEffect(() => {
     if (propJob) {
@@ -71,10 +71,10 @@ export function EditJobForm({
         location: propJob.location || '',
         status: propJob.status,
       });
-    } else if (jobId) {
+    } else if (uuid) {
       fetchJob();
     }
-  }, [propJob, jobId, fetchJob]);
+  }, [propJob, uuid, fetchJob]);
 
   const validateForm = (): boolean => {
     const newErrors: Partial<JobFormData> = {};

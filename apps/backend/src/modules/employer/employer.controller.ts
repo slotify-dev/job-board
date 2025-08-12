@@ -85,6 +85,42 @@ export class EmployerController {
     }
   }
 
+  async getJobByUuid(
+    req: Request<JobParams, JobResponse>,
+    res: Response<JobResponse>,
+  ) {
+    try {
+      if (!req.user || req.user.role !== 'employer') {
+        return res.status(403).json({ success: false });
+      }
+
+      const job = await JobRepository.findByUuidAndEmployerId(
+        req.params.uuid,
+        req.user.id,
+      );
+
+      if (!job) {
+        return res.status(404).json({ success: false });
+      }
+
+      return res.json({
+        success: true,
+        job: {
+          id: job.id,
+          uuid: job.uuid,
+          title: job.title,
+          description: job.description as Record<string, unknown>,
+          location: job.location,
+          status: job.status as JobStatus,
+          createdAt: job.createdAt,
+        },
+      });
+    } catch (error) {
+      console.error('Error fetching job by UUID:', error);
+      return res.status(500).json({ success: false });
+    }
+  }
+
   async updateJob(
     req: Request<JobParams, JobResponse, UpdateJobRequest>,
     res: Response<JobResponse>,

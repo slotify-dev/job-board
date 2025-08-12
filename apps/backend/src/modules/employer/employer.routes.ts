@@ -29,6 +29,12 @@ router.post(
 
 router.get('/jobs', employerController.getMyJobs.bind(employerController));
 
+router.get(
+  '/jobs/:uuid',
+  validateParams(jobParamsSchema),
+  employerController.getJobByUuid.bind(employerController),
+);
+
 router.put(
   '/jobs/:uuid',
   validateParams(jobParamsSchema),

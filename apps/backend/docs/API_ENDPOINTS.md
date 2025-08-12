@@ -32,6 +32,7 @@ All endpoints return `{ success: true }` for now. Implementation will be added l
 | ------ | --------------------------------------- | ---------------------------- | -------- | ------------- |
 | POST   | `/api/employer/jobs`                    | Post a new job               | employer | employer      |
 | GET    | `/api/employer/jobs`                    | Get my posted jobs           | employer | employer      |
+| GET    | `/api/employer/jobs/:uuid`              | Get my job by UUID           | employer | employer      |
 | PUT    | `/api/employer/jobs/:uuid`              | Update my job                | employer | employer      |
 | DELETE | `/api/employer/jobs/:uuid`              | Delete my job                | employer | employer      |
 | GET    | `/api/employer/jobs/:uuid/applications` | View applications for my job | employer | employer      |
