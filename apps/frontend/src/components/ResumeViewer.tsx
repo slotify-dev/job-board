@@ -4,12 +4,14 @@ interface ResumeViewerProps {
   resumeUrl?: string;
   applicantName?: string;
   className?: string;
+  variant?: 'button' | 'link';
 }
 
 export function ResumeViewer({
   resumeUrl,
   applicantName,
   className = '',
+  variant = 'button',
 }: ResumeViewerProps) {
   const [showModal, setShowModal] = useState(false);
   const [iframeError, setIframeError] = useState(false);
@@ -84,6 +86,157 @@ export function ResumeViewer({
     link.click();
     document.body.removeChild(link);
   };
+
+  if (variant === 'link') {
+    return (
+      <>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={handleViewResume}
+            className={`${className} underline hover:no-underline transition-all`}
+          >
+            View Resume
+          </button>
+
+          <button
+            onClick={handleDownload}
+            className="underline hover:no-underline transition-all text-primary-600 hover:text-black"
+            title="Download Resume"
+          >
+            Download
+          </button>
+        </div>
+
+        {/* Resume Modal */}
+        {showModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg w-full max-w-4xl h-5/6 flex flex-col">
+              <div className="flex justify-between items-center p-4 border-b">
+                <h3 className="text-lg font-medium text-black">
+                  {applicantName ? `${applicantName}'s Resume` : 'Resume'}
+                </h3>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleDownload}
+                    className="btn-secondary text-sm px-3 py-1 flex items-center gap-1"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                    Download
+                  </button>
+                  <button
+                    onClick={() => setShowModal(false)}
+                    className="text-primary-500 hover:text-primary-700 p-1"
+                  >
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex-1 p-4">
+                {!iframeError ? (
+                  <iframe
+                    src={viewerUrl}
+                    className="w-full h-full border border-primary-200 rounded"
+                    title="Resume Viewer"
+                    onLoad={() => {
+                      // Check if iframe loaded successfully
+                      const iframe = document.querySelector(
+                        'iframe[title="Resume Viewer"]',
+                      ) as HTMLIFrameElement | null;
+                      if (iframe) {
+                        try {
+                          // Try to access iframe content to detect loading issues
+                          if (iframe.contentDocument === null) {
+                            // PDF might be loading, this is normal
+                            return;
+                          }
+                        } catch {
+                          // Cross-origin or other error, but iframe might still work for PDFs
+                          return;
+                        }
+                      }
+                    }}
+                    onError={() => {
+                      console.error('Failed to load resume in iframe');
+                      setIframeError(true);
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full border border-primary-200 rounded bg-gray-50 flex items-center justify-center">
+                    <div className="text-center p-8">
+                      <svg
+                        className="w-16 h-16 text-gray-400 mx-auto mb-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1}
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">
+                        Preview Not Available
+                      </h3>
+                      <p className="text-gray-600 mb-4">
+                        The resume preview cannot be displayed in this browser.
+                      </p>
+                      <div className="flex gap-3 justify-center">
+                        <button
+                          onClick={() => setIframeError(false)}
+                          className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                        >
+                          Try Again
+                        </button>
+                        <button
+                          onClick={handleDownload}
+                          className="btn-primary"
+                        >
+                          Download Resume
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="p-4 border-t text-sm text-primary-600 text-center">
+                {!iframeError
+                  ? "If the resume doesn't display properly, please use the download button above."
+                  : 'Having trouble viewing? Try downloading the resume or use a different browser.'}
+              </div>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
 
   return (
     <>

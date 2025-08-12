@@ -138,7 +138,8 @@ export function ProfileView({ onEditClick }: ProfileViewProps) {
                 <ResumeViewer
                   resumeUrl={profile.resumeUrl}
                   applicantName={profile.fullName}
-                  className="inline-flex items-center text-black hover:text-primary-600 transition-colors"
+                  variant="link"
+                  className="text-black hover:text-primary-600 transition-colors"
                 />
               ) : (
                 <p className="text-primary-400 italic">No resume uploaded</p>
