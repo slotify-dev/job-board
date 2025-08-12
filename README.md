@@ -1,14 +1,24 @@
 # Job Board Application
 
-This monorepo provides a complete full-stack development environment using Docker
-with hot reload for both frontend and backend.
-It is designed for a Job Board Application app.
+A modern, full-stack job board platform that connects employers with job seekers through an intuitive and secure web application. Built with TypeScript, React, Express.js, and PostgreSQL, this application provides a complete hiring ecosystem with advanced search, role-based dashboards, and enterprise-grade security.
+
+## 🎯 What This Application Offers
+
+**For Job Seekers**: Advanced job search, one-click applications, resume management, and real-time application tracking.
+
+**For Employers**: Comprehensive job posting management, candidate review system, company branding, and hiring analytics.
+
+**Security & Authentication**: Dual authentication (password + Google OAuth2), role-based access control, and secure session management.
+
+**Technical Excellence**: High-performance architecture with optimized queries, responsive design, and modern development practices.
+
+➡️ **[View Complete Feature Overview](docs/features.md)** - Detailed breakdown of all functionality and capabilities
 
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) and Docker Compose (only requirements!)
 
-## One-Line Setup
+## Local Setup
 
 ```bash
 # Copy environment files
@@ -61,39 +71,7 @@ That's it! The entire stack will be running with:
 - **Frontend (React + Vite)**: `http://localhost:5173`
 - **Backend API (Express + Bun)**: `http://localhost:3000/api`
 
-## Google OAuth Setup (Optional)
-
-To enable Google Sign-In functionality, you need to set up Google OAuth credentials:
-
-### 1. Create Google OAuth Credentials
-
-1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select an existing one
-3. Enable the **Google+ API** or **Google Identity Services**
-4. Go to **Credentials** → **Create Credentials** → **OAuth 2.0 Client ID**
-5. Configure the OAuth consent screen with your app details
-6. Create **Web Application** credentials with these settings:
-   - **Authorized JavaScript origins**: `http://localhost:5173`
-   - **Authorized redirect URIs**: `http://localhost:5173` (React OAuth handles this)
-
-### 2. Configure Environment Variables
-
-Add your Google Client ID to the frontend environment file:
-
-```bash
-# In apps/frontend/.env
-VITE_GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
-```
-
-**Note**: Only the Client ID is needed for the frontend. The Client Secret is not used for security reasons
-(it would be exposed in the browser).
-
-### 3. Test Google Sign-In
-
-1. Restart the frontend: `docker-compose restart frontend`
-2. Visit `http://localhost:5173`
-3. Click "Continue with Google" on the login or register page
-4. Complete the OAuth flow
+**Optional**: To enable Google OAuth login, see the [OAuth Setup Guide](docs/oauth-setup.md).
 
 ## Services Overview
 
@@ -140,9 +118,57 @@ lsof -i :3000
 
 ## 📚 Documentation
 
+- **[Complete Features Overview](docs/features.md)** - Detailed breakdown of all application functionality and capabilities
+- **[Design Architecture](docs/design.md)** - Comprehensive design decisions, database schema, authentication strategy, and architectural choices
+- **[OAuth Setup Guide](docs/oauth-setup.md)** - Step-by-step Google OAuth2 configuration and troubleshooting
 - **[SSO Authentication](docs/sso.md)** - Complete guide to Google OAuth implementation and flow
 - **[Backend API](apps/backend/README.md)** - API documentation and backend setup
 - **[Frontend Guide](apps/frontend/README.md)** - React application documentation
+
+## 🏗️ Key Design Decisions
+
+This job board application follows modern full-stack principles with careful attention to security, scalability, and developer experience:
+
+### Database Schema
+
+- **Hybrid user model** supporting both password-based and SSO authentication
+- **Role-based architecture** with separate profiles for job seekers and employers
+- **Strategic indexing** for optimal query performance
+- **UUID strategy** for public-facing identifiers with internal serial PKs
+
+### Authentication Strategy
+
+- **JWT tokens** stored in HttpOnly cookies for XSS protection
+- **Dual authentication support**: Traditional password + Google OAuth2
+- **Role confirmation system** allows deferred role selection during SSO signup
+- **Account linking** connects SSO logins to existing email accounts
+
+### OAuth2 Integration - Google
+
+**Why Google?** Ubiquitous adoption, excellent security standards, and enterprise-ready implementation.
+
+- **Server-side token exchange** keeps client secrets secure
+- **Dynamic redirect URIs** for flexible deployment environments
+- **State-based role passing** for seamless user experience
+- **Comprehensive error handling** with user-friendly feedback
+
+### Architectural Choices
+
+**Backend:**
+
+- **Modular Express.js** with feature-based organization
+- **Repository pattern** for clean data access layer
+- **Drizzle ORM** for type-safe, lightweight database operations
+- **Middleware-driven security** (helmet, cors, rate limiting, input validation)
+
+**Frontend:**
+
+- **React 18 + TypeScript** for type safety and modern development
+- **Redux Toolkit** for predictable state management
+- **Module-based architecture** with co-located feature concerns
+- **Vite** for lightning-fast development experience
+
+For detailed explanations of these decisions and their rationale, see the [Design Architecture Documentation](docs/design.md).
 
 ## 🔧 Code Quality & Development Scripts
 
