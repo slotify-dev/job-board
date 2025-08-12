@@ -5,6 +5,7 @@ import {
   varchar,
   text,
   timestamp,
+  boolean,
   index,
 } from 'drizzle-orm/pg-core';
 
@@ -16,6 +17,7 @@ export const users = pgTable(
     email: varchar('email', { length: 255 }).notNull().unique(),
     passwordHash: text('password_hash'),
     role: varchar('role', { length: 20 }).notNull().default('job_seeker'),
+    roleConfirmed: boolean('role_confirmed').notNull().default(false),
     ssoProvider: varchar('sso_provider', { length: 50 }),
     ssoId: varchar('sso_id', { length: 255 }),
     createdAt: timestamp('created_at').notNull().defaultNow(),

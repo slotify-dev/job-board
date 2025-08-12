@@ -5,6 +5,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { LoginPage } from './modules/auth/components/LoginPage';
 import { RegisterPage } from './modules/auth/components/RegisterPage';
 import { GoogleCallback } from './modules/auth/components/GoogleCallback';
+import { RoleSelectionPage } from './modules/auth/components/RoleSelectionPage';
 import {
   ProtectedRoute,
   PublicRoute,
@@ -66,6 +67,7 @@ export function AppRoutes() {
         }
       />
       <Route path="/auth/google/callback" element={<GoogleCallback />} />
+      <Route path="/auth/select-role" element={<RoleSelectionPage />} />
 
       {/* Protected Job Seeker Routes */}
       <Route

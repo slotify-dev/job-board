@@ -7,6 +7,7 @@ import {
   OAuthCallbackRequest,
   OAuthSignInRequest,
   ProviderParams,
+  RoleSelectionRequest,
 } from './auth.types';
 
 import bcrypt from 'bcryptjs';
@@ -27,6 +28,7 @@ export class AuthController {
       const newUser = await UserRepository.create({
         passwordHash,
         role: req.body.role,
+        roleConfirmed: true,
         email: req.body.email,
       });
 
@@ -132,20 +134,31 @@ export class AuthController {
           );
           user = updatedUser;
         } else {
+          // Create user without role if not provided - user will need to select role later
           user = await UserRepository.create({
             email: req.body.email,
-            role: req.body.role,
+            role: req.body.role || 'job_seeker', // Default to job_seeker if no role provided
+            roleConfirmed: !!req.body.role, // Only confirmed if role was provided
             ssoProvider: req.body.provider,
             ssoId: req.body.ssoId,
           });
 
-          // Auto-create employer profile if user is an employer (OAuth signup)
+          // Only auto-create profile if role was explicitly provided
           if (req.body.role === 'employer') {
             await EmployerRepository.create({
               userId: user.id,
               companyName: `${req.body.email?.split('@')[0] || 'Company'}'s Company`,
               contactPerson: req.body.email?.split('@')[0] || 'Contact',
               companyWebsite: null,
+            });
+          } else if (req.body.role === 'job_seeker') {
+            await JobSeekerRepository.create({
+              userId: user.id,
+              fullName: req.body.email?.split('@')[0] || 'Unknown Name',
+              email: req.body.email,
+              phone: null,
+              address: null,
+              resumeUrl: null,
             });
           }
         }
@@ -169,6 +182,7 @@ export class AuthController {
           role: user.role,
           uuid: user.uuid,
           email: user.email,
+          roleConfirmed: user.roleConfirmed,
         },
       });
     } catch {
@@ -213,7 +227,8 @@ export class AuthController {
           // Create new user with OAuth account
           user = await UserRepository.create({
             email,
-            role,
+            role: role || 'job_seeker', // Default to job_seeker if no role provided
+            roleConfirmed: !!role, // Only confirmed if role was provided
             ssoProvider: provider,
             ssoId: providerId,
           });
@@ -224,7 +239,7 @@ export class AuthController {
               .json({ error: 'Failed to create user account' });
           }
 
-          // Create profile for the user based on role
+          // Only create profile if role was explicitly provided
           if (role === 'employer') {
             await EmployerRepository.create({
               userId: user.id,
@@ -232,7 +247,7 @@ export class AuthController {
               contactPerson: name || 'Unknown Person',
               companyWebsite: null,
             });
-          } else {
+          } else if (role === 'job_seeker') {
             await JobSeekerRepository.create({
               userId: user.id,
               fullName: name || 'Unknown Name',
@@ -266,6 +281,7 @@ export class AuthController {
           role: user.role,
           uuid: user.uuid,
           email: user.email,
+          roleConfirmed: user.roleConfirmed,
         },
       });
     } catch (error) {
@@ -276,6 +292,214 @@ export class AuthController {
       return res.status(500).json({
         error: 'Internal server error',
       });
+    }
+  }
+
+  async selectRole(
+    req: Request<object, object, RoleSelectionRequest>,
+    res: Response,
+  ) {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      const { role } = req.body;
+      const user = await UserRepository.findById(userId);
+
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Update user role and mark as confirmed
+      const updatedUser = await UserRepository.updateById(userId, {
+        role,
+        roleConfirmed: true,
+      });
+
+      if (!updatedUser) {
+        return res.status(500).json({ error: 'Failed to update user role' });
+      }
+
+      // Create appropriate profile based on selected role
+      if (role === 'employer') {
+        // Check if employer profile already exists
+        const existingEmployer = await EmployerRepository.findByUserId(userId);
+        if (!existingEmployer) {
+          await EmployerRepository.create({
+            userId: userId,
+            companyName: `${user.email?.split('@')[0] || 'Company'}'s Company`,
+            contactPerson: user.email?.split('@')[0] || 'Contact',
+            companyWebsite: null,
+          });
+        }
+      } else if (role === 'job_seeker') {
+        // Check if job seeker profile already exists
+        const existingJobSeeker =
+          await JobSeekerRepository.findByUserId(userId);
+        if (!existingJobSeeker) {
+          await JobSeekerRepository.create({
+            userId: userId,
+            fullName: user.email?.split('@')[0] || 'Unknown Name',
+            email: user.email,
+            phone: null,
+            address: null,
+            resumeUrl: null,
+          });
+        }
+      }
+
+      return res.json({
+        success: true,
+        user: {
+          id: updatedUser.id,
+          role: updatedUser.role,
+          uuid: updatedUser.uuid,
+          email: updatedUser.email,
+        },
+      });
+    } catch (error) {
+      console.error('Role selection error:', error);
+      return res.status(500).json({
+        error: 'Internal server error',
+      });
+    }
+  }
+
+  async googleCallback(
+    req: Request<object, object, { code: string; role?: string }>,
+    res: Response,
+  ) {
+    try {
+      const { code, role } = req.body;
+
+      if (!code) {
+        return res
+          .status(400)
+          .json({ error: 'Authorization code is required' });
+      }
+
+      // Exchange code for access token with Google
+      const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          client_id: process.env.GOOGLE_CLIENT_ID || '',
+          client_secret: process.env.GOOGLE_CLIENT_SECRET || '',
+          code,
+          grant_type: 'authorization_code',
+          redirect_uri: 'http://localhost:5173/auth/google/callback',
+        }),
+      });
+
+      if (!tokenResponse.ok) {
+        const error = await tokenResponse.text();
+        console.error('Google token exchange error:', error);
+        return res
+          .status(400)
+          .json({ error: 'Failed to exchange authorization code' });
+      }
+
+      const tokenData = await tokenResponse.json();
+
+      // Get user info from Google
+      const userInfoResponse = await fetch(
+        `https://www.googleapis.com/oauth2/v2/userinfo?access_token=${tokenData.access_token}`,
+      );
+
+      if (!userInfoResponse.ok) {
+        return res
+          .status(400)
+          .json({ error: 'Failed to get user information' });
+      }
+
+      const userInfo = await userInfoResponse.json();
+
+      // Check if user exists
+      let user = await UserRepository.findBySsoProviderAndId(
+        'google',
+        userInfo.id,
+      );
+
+      if (!user) {
+        // Check if user exists by email
+        const existingUserByEmail = await UserRepository.findByEmail(
+          userInfo.email,
+        );
+
+        if (existingUserByEmail) {
+          // Link Google account to existing user
+          user = await UserRepository.updateById(existingUserByEmail.id, {
+            ssoProvider: 'google',
+            ssoId: userInfo.id,
+          });
+        } else {
+          // Create new user
+          user = await UserRepository.create({
+            email: userInfo.email,
+            role: role || 'job_seeker',
+            roleConfirmed: !!role, // Only confirmed if role was provided
+            ssoProvider: 'google',
+            ssoId: userInfo.id,
+          });
+
+          if (!user) {
+            return res
+              .status(500)
+              .json({ error: 'Failed to create user account' });
+          }
+
+          // Create profile if role was provided
+          if (role === 'employer') {
+            await EmployerRepository.create({
+              userId: user.id,
+              companyName: userInfo.name || 'Unknown Company',
+              contactPerson: userInfo.name || 'Unknown Person',
+              companyWebsite: null,
+            });
+          } else if (role === 'job_seeker') {
+            await JobSeekerRepository.create({
+              userId: user.id,
+              fullName: userInfo.name || 'Unknown Name',
+              email: userInfo.email,
+              phone: null,
+              address: null,
+              resumeUrl: null,
+            });
+          }
+        }
+      }
+
+      if (!user) {
+        return res
+          .status(500)
+          .json({ error: 'Failed to create or update user' });
+      }
+
+      // Generate JWT token
+      const token = jwt.sign({ userId: user.id }, authConfig.jwtSecret, {
+        expiresIn: authConfig.jwtExpiresIn,
+      } as SignOptions);
+
+      // Set authentication cookie
+      res.cookie(authConfig.cookieName, token, authConfig.cookieOptions);
+
+      return res.json({
+        success: true,
+        user: {
+          id: user.id,
+          role: user.role,
+          uuid: user.uuid,
+          email: user.email,
+          roleConfirmed: user.roleConfirmed,
+        },
+      });
+    } catch (error) {
+      console.error('Google OAuth callback error:', error);
+      return res.status(500).json({ error: 'Internal server error' });
     }
   }
 

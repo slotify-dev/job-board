@@ -7,15 +7,13 @@ interface GoogleLoginButtonProps {
   children?: ReactNode;
 }
 
-export function GoogleLoginButton({
-  role = 'job_seeker',
-  children,
-}: GoogleLoginButtonProps) {
+export function GoogleLoginButton({ role, children }: GoogleLoginButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
+      // Don't pass role to trigger role selection flow when role is not specified
       googleOAuthService.startGoogleAuth(role);
     } catch (error) {
       console.error('Google login failed:', error);

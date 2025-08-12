@@ -58,6 +58,37 @@ export const getCurrentUserAsync = createAsyncThunk(
   },
 );
 
+export const selectRoleAsync = createAsyncThunk(
+  'auth/selectRole',
+  async (role: 'job_seeker' | 'employer', { rejectWithValue }) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/auth/select-role`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({ role }),
+        },
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to select role');
+      }
+
+      const { user } = await response.json();
+      return user;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Role selection failed',
+      );
+    }
+  },
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -134,6 +165,21 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
         state.isInitialized = true;
+      })
+
+      // Role selection
+      .addCase(selectRoleAsync.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(selectRoleAsync.fulfilled, (state, action) => {
+        state.user = action.payload;
+        state.isLoading = false;
+        state.error = null;
+      })
+      .addCase(selectRoleAsync.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
       });
   },
 });

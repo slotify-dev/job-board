@@ -2,15 +2,22 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { roleSelectionSchema } from '../utils/authHelpers';
-import type { RoleSelectionData, UserRole } from '../types/auth.types';
+import { z } from 'zod';
+import type { UserRole } from '../types/auth.types';
 import { useAppDispatch, useAppSelector } from '../../../shared/store/store';
-import { linkAuth0AccountAsync, clearError } from '../store/authSlice';
+import { selectRoleAsync, clearError } from '../store/authSlice';
 import { useEffect } from 'react';
 
+const roleSelectionSchema = z.object({
+  role: z.enum(['job_seeker', 'employer'], {
+    required_error: 'Please select a role',
+  }),
+});
+
+type RoleSelectionData = z.infer<typeof roleSelectionSchema>;
+
 interface RoleSelectionFormProps {
-  auth0Sub: string;
-  userName: string;
+  userName?: string;
   onSuccess?: () => void;
 }
 
@@ -28,8 +35,7 @@ const roleOptions: { value: UserRole; label: string; description: string }[] = [
 ];
 
 export function RoleSelectionForm({
-  auth0Sub,
-  userName,
+  userName = 'there',
   onSuccess,
 }: RoleSelectionFormProps) {
   const dispatch = useAppDispatch();
@@ -55,14 +61,9 @@ export function RoleSelectionForm({
 
   const onSubmit = async (data: RoleSelectionData) => {
     try {
-      const result = await dispatch(
-        linkAuth0AccountAsync({
-          auth0Sub,
-          roleData: data,
-        }),
-      );
+      const result = await dispatch(selectRoleAsync(data.role));
 
-      if (linkAuth0AccountAsync.fulfilled.match(result)) {
+      if (selectRoleAsync.fulfilled.match(result)) {
         toast.success('Account setup complete! Welcome to Job Board!');
         onSuccess?.();
       }

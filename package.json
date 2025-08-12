@@ -29,8 +29,8 @@
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
-    "lint:md": "markdownlint-cli2 '**/*.md' '!**/node_modules/**'",
-    "lint:md:fix": "markdownlint-cli2 '**/*.md' '!**/node_modules/**' --fix",
+    "lint:md": "markdownlint-cli2 --config .markdownlint.json '**/*.md' '!**/node_modules/**'",
+    "lint:md:fix": "markdownlint-cli2 --config .markdownlint.json '**/*.md' '!**/node_modules/**' --fix",
     "format:all": "bun run lint:md:fix && bun run format && bun run lint:fix"
   },
   "lint-staged": {

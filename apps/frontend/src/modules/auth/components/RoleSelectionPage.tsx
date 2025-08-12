@@ -1,16 +1,36 @@
 import { RoleSelectionForm } from './RoleSelectionForm';
 import { useAuth } from '../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 import { Layout } from '../../../shared/components/layout';
+import { useEffect } from 'react';
 
 export function RoleSelectionPage() {
-  const { auth0User } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Redirect if not authenticated
+    if (!isAuthenticated) {
+      navigate('/auth/login');
+      return;
+    }
+
+    // Redirect if role is already confirmed
+    if (user?.roleConfirmed) {
+      if (user.role === 'employer') {
+        navigate('/dashboard/employer');
+      } else {
+        navigate('/dashboard/job-seeker');
+      }
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleRoleSelectionSuccess = () => {
-    // The role redirect will be handled by the useAuth hook
-    // after successful account linking
+    // Redirect will be handled by the useEffect above
+    // after the user state is updated
   };
 
-  if (!auth0User) {
+  if (!user) {
     return (
       <Layout>
         <div className="flex items-center justify-center py-20">
@@ -23,7 +43,7 @@ export function RoleSelectionPage() {
     );
   }
 
-  const userName = auth0User.given_name || auth0User.name || 'there';
+  const userName = user.email?.split('@')[0] || 'there';
 
   return (
     <Layout>
@@ -37,7 +57,6 @@ export function RoleSelectionPage() {
           </div>
 
           <RoleSelectionForm
-            auth0Sub={auth0User.sub || ''}
             userName={userName}
             onSuccess={handleRoleSelectionSuccess}
           />

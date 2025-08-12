@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '../../../shared/store/store';
-import { authService } from '../services/authService';
-import { googleOAuthService } from '../services/googleOAuth';
 import { setLoading } from '../store/authSlice';
 import { Layout } from '../../../shared/components/layout';
 import type { UserRole } from '../types/auth.types';
@@ -22,41 +20,56 @@ export function GoogleCallback() {
         const state = urlParams.get('state');
         const errorParam = urlParams.get('error');
 
+        // Debug logging
+        console.log('Current URL:', window.location.href);
+        console.log('URL Params:', {
+          code: code ? `${code.substring(0, 10)}...` : null,
+          state,
+          error: errorParam,
+        });
+        console.log('Current origin:', window.location.origin);
+
         if (errorParam) {
-          throw new Error('Google OAuth was cancelled or failed');
+          throw new Error(`Google OAuth error: ${errorParam}`);
         }
 
         if (!code) {
           throw new Error('No authorization code received from Google');
         }
 
-        // Parse role from state
-        let role: UserRole = 'job_seeker';
+        // Parse role from state (only if explicitly provided)
+        let role: UserRole | undefined = undefined;
         if (state) {
           try {
             const stateData = JSON.parse(state);
-            role = stateData.role || 'job_seeker';
+            role = stateData.role; // Don't provide default here
           } catch {
-            // Ignore state parsing errors, use default role
+            // Ignore state parsing errors, don't provide role
           }
         }
 
-        // Exchange code for access token
-        const tokenResponse =
-          await googleOAuthService.exchangeCodeForToken(code);
-
-        // Get user info from Google
-        const userInfo = await googleOAuthService.getUserInfo(
-          tokenResponse.access_token,
+        // Send authorization code to backend for token exchange
+        const response = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL}/auth/google/callback`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+              code,
+              ...(role && { role }), // Only include role if explicitly provided
+            }),
+          },
         );
 
-        // Send OAuth callback data to backend
-        const user = await authService.oauthCallback({
-          ssoId: userInfo.id,
-          provider: 'google',
-          email: userInfo.email,
-          role,
-        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Google authentication failed');
+        }
+
+        const { user } = await response.json();
 
         // Update Redux state
         dispatch({
@@ -64,11 +77,16 @@ export function GoogleCallback() {
           payload: user,
         });
 
-        // Redirect based on role
-        if (user.role === 'employer') {
-          navigate('/dashboard/employer');
+        // Check if user needs to confirm their role
+        if (!user.roleConfirmed) {
+          navigate('/auth/select-role');
         } else {
-          navigate('/dashboard/job-seeker');
+          // Redirect based on role
+          if (user.role === 'employer') {
+            navigate('/dashboard/employer');
+          } else {
+            navigate('/dashboard/job-seeker');
+          }
         }
       } catch (error) {
         console.error('Google OAuth callback error:', error);

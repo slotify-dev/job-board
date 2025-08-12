@@ -33,11 +33,13 @@ export default [
         },
       },
       globals: {
-        browser: true,
         node: true,
+        browser: true,
         es2022: true,
         URL: 'readonly',
+        fetch: 'readonly',
         process: 'readonly',
+        URLSearchParams: 'readonly',
       },
     },
     plugins: {

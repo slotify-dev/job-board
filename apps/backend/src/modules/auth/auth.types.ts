@@ -29,7 +29,7 @@ export const loginSchema = z.object({
 export const oauthCallbackSchema = z.object({
   ssoId: z.string().min(1, 'SSO ID is required'),
   provider: z.enum(['google']).describe('OAuth provider'),
-  role: z.enum(['job_seeker', 'employer']).default('job_seeker'),
+  role: z.enum(['job_seeker', 'employer']).optional(),
   email: z.string().email('Please provide a valid email address').toLowerCase(),
 });
 
@@ -39,7 +39,12 @@ export const oauthSignInSchema = z.object({
   email: z.string().email('Please provide a valid email address').toLowerCase(),
   name: z.string().min(1, 'Name is required'),
   picture: z.string().optional(),
-  role: z.enum(['job_seeker', 'employer']).default('job_seeker'),
+  role: z.enum(['job_seeker', 'employer']).optional(),
+});
+
+// Schema for role selection after SSO
+export const roleSelectionSchema = z.object({
+  role: z.enum(['job_seeker', 'employer']),
 });
 
 // Provider parameter validation
@@ -82,3 +87,4 @@ export type OAuthCallbackRequest = z.infer<typeof oauthCallbackSchema>;
 export type OAuthSignInRequest = z.infer<typeof oauthSignInSchema>;
 export type ProviderParams = z.infer<typeof providerParamsSchema>;
 export type GoogleSignInRequest = z.infer<typeof googleSignInSchema>;
+export type RoleSelectionRequest = z.infer<typeof roleSelectionSchema>;

@@ -1,6 +1,7 @@
 # Job Board Application
 
-This monorepo provides a complete full-stack development environment using Docker with hot reload for both frontend and backend.
+This monorepo provides a complete full-stack development environment using Docker
+with hot reload for both frontend and backend.
 It is designed for a Job Board Application app.
 
 ## Prerequisites
@@ -128,7 +129,7 @@ If ports 5173 or 3000 are already in use:
 lsof -i :5173
 lsof -i :3000
 
-# Kill processes or edit docker-compose.yml to use different ports
+# Kill processes or edit docker-compose.yml for different ports
 ```
 
 ### Frontend Can't Connect to Backend
@@ -136,6 +137,12 @@ lsof -i :3000
 1. Ensure backend is running: `http://localhost:3000/api/health`
 2. Check API proxy configuration in `apps/frontend/vite.config.ts`
 3. Verify `VITE_API_URL` environment variable
+
+## 📚 Documentation
+
+- **[SSO Authentication](docs/sso.md)** - Complete guide to Google OAuth implementation and flow
+- **[Backend API](apps/backend/README.md)** - API documentation and backend setup
+- **[Frontend Guide](apps/frontend/README.md)** - React application documentation
 
 ## 🔧 Code Quality & Development Scripts
 

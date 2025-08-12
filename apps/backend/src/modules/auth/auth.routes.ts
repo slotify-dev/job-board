@@ -9,6 +9,7 @@ import {
   oauthCallbackSchema,
   oauthSignInSchema,
   providerParamsSchema,
+  roleSelectionSchema,
 } from './auth.types';
 import { authRateLimit } from '../../middleware/rateLimiters';
 
@@ -45,8 +46,20 @@ router.post(
   authController.oauthSignIn.bind(authController),
 );
 
+router.post(
+  '/google/callback',
+  authRateLimit,
+  authController.googleCallback.bind(authController),
+);
+
 // Protected auth routes
 router.get('/me', authMiddleware, authController.getMe.bind(authController));
+router.post(
+  '/select-role',
+  authMiddleware,
+  validateRequest(roleSelectionSchema),
+  authController.selectRole.bind(authController),
+);
 router.post(
   '/logout',
   authMiddleware,
