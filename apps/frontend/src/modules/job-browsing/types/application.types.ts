@@ -12,6 +12,7 @@ export interface ApplicationWithJob {
   status: string;
   createdAt: Date;
   jobTitle: string;
+  jobUuid: string;
   companyName: string;
 }
 

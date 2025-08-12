@@ -11,6 +11,7 @@ import { employers } from '../models/employer.model';
 
 export interface ApplicationWithJob extends Application {
   jobTitle: string | null;
+  jobUuid: string | null;
   companyName: string | null;
 }
 
@@ -90,6 +91,7 @@ export default class ApplicationRepository {
           status: applications.status,
           createdAt: applications.createdAt,
           jobTitle: jobs.title,
+          jobUuid: jobs.uuid,
           companyName: employers.companyName,
         })
         .from(applications)

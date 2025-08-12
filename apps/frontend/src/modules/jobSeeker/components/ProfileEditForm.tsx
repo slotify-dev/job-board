@@ -2,6 +2,7 @@ import type { UpdateJobSeekerProfileRequest } from '../types/profile.types';
 import React, { useState, useEffect } from 'react';
 import { useProfile } from '../hooks/useProfile';
 import { toast } from 'sonner';
+import { profileService } from '../services/profileService';
 
 // Using File from DOM lib types
 
@@ -17,7 +18,6 @@ export function ProfileEditForm({ onCancel, onSaved }: ProfileEditFormProps) {
     email: '',
     phone: '',
     address: '',
-    resumeUrl: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -31,7 +31,6 @@ export function ProfileEditForm({ onCancel, onSaved }: ProfileEditFormProps) {
         email: profile.email || '',
         phone: profile.phone || '',
         address: profile.address || '',
-        resumeUrl: profile.resumeUrl || '',
       });
     }
   }, [profile]);
@@ -59,14 +58,6 @@ export function ProfileEditForm({ onCancel, onSaved }: ProfileEditFormProps) {
       newErrors.address = 'Address must be less than 1000 characters';
     }
 
-    if (formData.resumeUrl) {
-      try {
-        new URL(formData.resumeUrl);
-      } catch {
-        newErrors.resumeUrl = 'Please enter a valid URL';
-      }
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -81,7 +72,17 @@ export function ProfileEditForm({ onCancel, onSaved }: ProfileEditFormProps) {
     setIsSubmitting(true);
 
     try {
-      await updateProfile(formData);
+      // First upload the file if one is selected
+      let resumeUrl = profile?.resumeUrl;
+      if (selectedFile) {
+        const uploadResult = await profileService.uploadResume(selectedFile);
+        resumeUrl = uploadResult.fileUrl;
+      }
+
+      // Update profile with the new resume URL if file was uploaded
+      const updateData = resumeUrl ? { ...formData, resumeUrl } : formData;
+      await updateProfile(updateData);
+
       toast.success('Profile updated successfully');
       onSaved();
     } catch (error) {
@@ -143,13 +144,10 @@ export function ProfileEditForm({ onCancel, onSaved }: ProfileEditFormProps) {
     }
 
     setSelectedFile(file);
-    // Clear resume URL when file is selected
-    setFormData((prev) => ({ ...prev, resumeUrl: '' }));
     // Clear any previous errors
     setErrors((prev) => ({
       ...prev,
       resumeFile: '',
-      resumeUrl: '',
     }));
   };
 
@@ -266,10 +264,34 @@ export function ProfileEditForm({ onCancel, onSaved }: ProfileEditFormProps) {
         <div>
           <h3 className="text-lg font-medium text-black mb-3">Resume</h3>
           <div className="space-y-4">
+            {/* Current Resume Display */}
+            {profile?.resumeUrl && !selectedFile && (
+              <div className="p-4 bg-primary-50 rounded-lg border border-primary-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-primary-700">
+                      Current Resume
+                    </p>
+                    <p className="text-sm text-primary-600">
+                      Resume uploaded successfully
+                    </p>
+                  </div>
+                  <a
+                    href={profile.resumeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-600 hover:text-blue-800 underline"
+                  >
+                    View Resume
+                  </a>
+                </div>
+              </div>
+            )}
+
             {/* File Upload */}
             <div>
               <label className="block text-sm font-medium text-primary-700 mb-2">
-                Upload Resume
+                {profile?.resumeUrl ? 'Upload New Resume' : 'Upload Resume'}
               </label>
               <input
                 type="file"
@@ -289,36 +311,6 @@ export function ProfileEditForm({ onCancel, onSaved }: ProfileEditFormProps) {
               )}
               {errors.resumeFile && (
                 <p className="text-red-500 text-sm mt-1">{errors.resumeFile}</p>
-              )}
-            </div>
-
-            {/* OR divider */}
-            <div className="flex items-center">
-              <div className="flex-1 border-t border-primary-200"></div>
-              <span className="px-3 text-sm text-primary-500">OR</span>
-              <div className="flex-1 border-t border-primary-200"></div>
-            </div>
-
-            {/* URL Input */}
-            <div>
-              <label className="block text-sm font-medium text-primary-700 mb-2">
-                Resume URL
-              </label>
-              <input
-                type="url"
-                id="resumeUrl"
-                name="resumeUrl"
-                value={formData.resumeUrl}
-                onChange={handleInputChange}
-                className={`input-field ${errors.resumeUrl ? 'border-red-500' : ''}`}
-                placeholder="https://drive.google.com/..."
-                disabled={isSubmitting}
-              />
-              <p className="text-primary-500 text-sm mt-1">
-                Link to your resume (Google Drive, Dropbox, etc.)
-              </p>
-              {errors.resumeUrl && (
-                <p className="text-red-500 text-sm mt-1">{errors.resumeUrl}</p>
               )}
             </div>
           </div>

@@ -13,7 +13,7 @@ export interface UpdateJobSeekerProfileRequest {
   email?: string;
   phone?: string;
   address?: string;
-  resumeUrl?: string;
+  resumeUrl?: string; // Keep for internal use when file upload returns a URL
 }
 
 export interface ProfileResponse {

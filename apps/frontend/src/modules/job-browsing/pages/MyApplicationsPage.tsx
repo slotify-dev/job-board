@@ -44,10 +44,8 @@ export const MyApplicationsPage = () => {
     );
   };
 
-  const handleViewJob = (jobId: number) => {
-    // Note: We need to find the job UUID, but for now we'll use the numeric ID
-    // In a real app, you'd store the job UUID in the application
-    navigate(`/jobs/${jobId}`);
+  const handleViewJob = (jobUuid: string) => {
+    navigate(`/jobs/${jobUuid}`);
   };
 
   if (isLoading) {
@@ -125,18 +123,15 @@ export const MyApplicationsPage = () => {
                 key={application.uuid}
                 className="card hover:shadow-lg transition-shadow"
               >
-                <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+                <div className="flex flex-col lg:flex-row lg:items-start gap-4">
                   {/* Job Info */}
                   <div className="flex-1">
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
-                      <h3
-                        className="text-lg font-semibold text-black hover:text-primary-700 cursor-pointer"
-                        onClick={() => handleViewJob(application.jobId)}
-                      >
-                        {application.jobTitle}
-                      </h3>
-                      {getStatusBadge(application.status)}
-                    </div>
+                    <h3
+                      className="text-lg font-semibold text-black hover:text-primary-700 cursor-pointer mb-2"
+                      onClick={() => handleViewJob(application.jobUuid)}
+                    >
+                      {application.jobTitle}
+                    </h3>
                     <p className="text-primary-600 mb-2">
                       {application.companyName}
                     </p>
@@ -145,24 +140,36 @@ export const MyApplicationsPage = () => {
                     </p>
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleViewJob(application.jobId)}
-                      className="px-4 py-2 border border-primary-300 text-primary-700 rounded-md hover:bg-primary-50 transition-colors"
-                    >
-                      View Job
-                    </button>
-                    {application.resumeUrl && (
-                      <a
-                        href={application.resumeUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-4 py-2 border border-primary-300 text-primary-700 rounded-md hover:bg-primary-50 transition-colors"
+                  {/* Status and Actions */}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                    {/* Status Badge */}
+                    <div className="flex-shrink-0">
+                      {getStatusBadge(application.status)}
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 flex-shrink-0">
+                      <button
+                        onClick={() => handleViewJob(application.jobUuid)}
+                        className="px-4 py-2 border border-primary-300 text-primary-700 rounded-md hover:bg-primary-50 transition-colors text-sm"
                       >
-                        View Resume
-                      </a>
-                    )}
+                        View Job
+                      </button>
+                      {application.resumeUrl && (
+                        <a
+                          href={
+                            application.resumeUrl.startsWith('/')
+                              ? `${window.location.origin}${application.resumeUrl}`
+                              : application.resumeUrl
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-4 py-2 border border-primary-300 text-primary-700 rounded-md hover:bg-primary-50 transition-colors text-sm"
+                        >
+                          View Resume
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </div>
 

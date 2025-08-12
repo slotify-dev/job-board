@@ -7,6 +7,15 @@ import type {
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 
+interface FileUploadResponse {
+  success: boolean;
+  fileUrl?: string;
+  filename?: string;
+  originalName?: string;
+  size?: number;
+  message?: string;
+}
+
 class ProfileService {
   private getAuthHeaders(): Record<string, string> {
     return {
@@ -71,6 +80,30 @@ class ProfileService {
       };
     } catch (error) {
       console.error('Error updating profile:', error);
+      throw error;
+    }
+  }
+
+  async uploadResume(file: File): Promise<FileUploadResponse> {
+    try {
+      const formData = new FormData();
+      formData.append('resume', file);
+
+      const response = await fetch(`${API_BASE_URL}/upload/resume`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+
+      const data = await this.handleResponse<FileUploadResponse>(response);
+
+      if (!data.success) {
+        throw new Error(data.message || 'Failed to upload resume');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error uploading resume:', error);
       throw error;
     }
   }
