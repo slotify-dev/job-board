@@ -1,6 +1,8 @@
 // Google OAuth configuration
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
-const REDIRECT_URI = `${window.location.origin}/auth/google/callback`;
+const REDIRECT_URI =
+  import.meta.env.VITE_GOOGLE_REDIRECT_URI ||
+  `${window.location.origin}/auth/google/callback`;
 
 export class GoogleOAuthService {
   private static instance: GoogleOAuthService;
