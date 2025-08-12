@@ -380,6 +380,13 @@ export class AuthController {
           .json({ error: 'Authorization code is required' });
       }
 
+      // Get the origin from the request to construct the redirect URI dynamically
+      const origin =
+        req.get('origin') ||
+        req.get('referer')?.replace(/\/.*$/, '') ||
+        'http://localhost:5173';
+      const redirectUri = `${origin}/auth/google/callback`;
+
       // Exchange code for access token with Google
       const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
@@ -391,7 +398,7 @@ export class AuthController {
           client_secret: process.env.GOOGLE_CLIENT_SECRET || '',
           code,
           grant_type: 'authorization_code',
-          redirect_uri: 'http://localhost:5173/auth/google/callback',
+          redirect_uri: redirectUri,
         }),
       });
 
