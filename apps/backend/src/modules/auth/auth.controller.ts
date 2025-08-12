@@ -5,6 +5,8 @@ import {
   LoginRequest,
   RegisterRequest,
   OAuthCallbackRequest,
+  OAuthSignInRequest,
+  ProviderParams,
 } from './auth.types';
 
 import bcrypt from 'bcryptjs';
@@ -181,6 +183,100 @@ export class AuthController {
       success: true,
       user: req.user,
     });
+  }
+
+  async oauthSignIn(
+    req: Request<ProviderParams, object, OAuthSignInRequest>,
+    res: Response,
+  ) {
+    try {
+      const provider = req.params.provider;
+      const { providerId, email, name, role } = req.body;
+
+      // Check if user exists by provider ID
+      let user = await UserRepository.findBySsoProviderAndId(
+        provider,
+        providerId,
+      );
+
+      if (!user) {
+        // Check if user exists by email
+        const existingUserByEmail = await UserRepository.findByEmail(email);
+
+        if (existingUserByEmail) {
+          // Link OAuth account to existing user
+          user = await UserRepository.updateById(existingUserByEmail.id, {
+            ssoProvider: provider,
+            ssoId: providerId,
+          });
+        } else {
+          // Create new user with OAuth account
+          user = await UserRepository.create({
+            email,
+            role,
+            ssoProvider: provider,
+            ssoId: providerId,
+          });
+
+          if (!user) {
+            return res
+              .status(500)
+              .json({ error: 'Failed to create user account' });
+          }
+
+          // Create profile for the user based on role
+          if (role === 'employer') {
+            await EmployerRepository.create({
+              userId: user.id,
+              companyName: name || 'Unknown Company',
+              contactPerson: name || 'Unknown Person',
+              companyWebsite: null,
+            });
+          } else {
+            await JobSeekerRepository.create({
+              userId: user.id,
+              fullName: name || 'Unknown Name',
+              email,
+              phone: null,
+              address: null,
+              resumeUrl: null,
+            });
+          }
+        }
+      }
+
+      if (!user) {
+        return res
+          .status(500)
+          .json({ error: 'Failed to create or update user' });
+      }
+
+      // Generate JWT token
+      const token = jwt.sign({ userId: user.id }, authConfig.jwtSecret, {
+        expiresIn: authConfig.jwtExpiresIn,
+      } as SignOptions);
+
+      // Set authentication cookie
+      res.cookie(authConfig.cookieName, token, authConfig.cookieOptions);
+
+      return res.json({
+        success: true,
+        user: {
+          id: user.id,
+          role: user.role,
+          uuid: user.uuid,
+          email: user.email,
+        },
+      });
+    } catch (error) {
+      console.error(
+        `OAuth sign-in error for provider ${req.params.provider}:`,
+        error,
+      );
+      return res.status(500).json({
+        error: 'Internal server error',
+      });
+    }
   }
 
   async logout(req: Request<object, object>, res: Response) {

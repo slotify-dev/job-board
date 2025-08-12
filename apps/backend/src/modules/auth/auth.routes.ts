@@ -1,8 +1,15 @@
 import { Router } from 'express';
 import { AuthController } from './auth.controller';
 import validateRequest from '../../middleware/validateRequest';
+import validateParams from '../../middleware/validateParams';
 import authMiddleware from '../../middleware/auth';
-import { registerSchema, loginSchema, oauthCallbackSchema } from './auth.types';
+import {
+  registerSchema,
+  loginSchema,
+  oauthCallbackSchema,
+  oauthSignInSchema,
+  providerParamsSchema,
+} from './auth.types';
 import { authRateLimit } from '../../middleware/rateLimiters';
 
 const router = Router();
@@ -28,6 +35,14 @@ router.post(
   authRateLimit,
   validateRequest(oauthCallbackSchema),
   authController.oauthCallback.bind(authController),
+);
+
+router.post(
+  '/oauth/:provider',
+  authRateLimit,
+  validateParams(providerParamsSchema),
+  validateRequest(oauthSignInSchema),
+  authController.oauthSignIn.bind(authController),
 );
 
 // Protected auth routes

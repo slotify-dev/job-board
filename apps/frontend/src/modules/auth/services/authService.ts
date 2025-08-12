@@ -12,6 +12,15 @@ interface OAuthCallbackData {
   role: UserRole;
 }
 
+interface GoogleSignInData {
+  googleId: string;
+  email: string;
+  name: string;
+  picture?: string;
+  accessToken: string;
+  role: UserRole;
+}
+
 import { formatAuthError } from '../utils/authHelpers';
 
 const API_BASE_URL =
@@ -165,6 +174,54 @@ class AuthService {
     } catch (error) {
       console.error('Failed to get current user:', error);
       return null;
+    }
+  }
+
+  async googleSignIn(googleData: GoogleSignInData): Promise<User> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/oauth/google`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        credentials: 'include',
+        body: JSON.stringify({
+          providerId: googleData.googleId,
+          email: googleData.email,
+          name: googleData.name,
+          picture: googleData.picture,
+          role: googleData.role,
+        }),
+      });
+
+      const data = await this.handleResponse<{
+        success: boolean;
+        user: {
+          id: string;
+          uuid: string;
+          email: string;
+          role: string;
+          createdAt?: string;
+        };
+      }>(response);
+
+      if (!data.success || !data.user) {
+        throw new Error('Google sign-in failed');
+      }
+
+      // Convert backend user format to frontend format
+      const user: User = {
+        id: data.user.uuid || data.user.id,
+        email: data.user.email,
+        firstName: googleData.name.split(' ')[0] || '',
+        lastName: googleData.name.split(' ').slice(1).join(' ') || '',
+        role: data.user.role as UserRole,
+        isEmailVerified: true,
+        createdAt: data.user.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      return user;
+    } catch (error) {
+      throw new Error(formatAuthError(error));
     }
   }
 

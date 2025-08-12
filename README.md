@@ -60,6 +60,40 @@ That's it! The entire stack will be running with:
 - **Frontend (React + Vite)**: `http://localhost:5173`
 - **Backend API (Express + Bun)**: `http://localhost:3000/api`
 
+## Google OAuth Setup (Optional)
+
+To enable Google Sign-In functionality, you need to set up Google OAuth credentials:
+
+### 1. Create Google OAuth Credentials
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Enable the **Google+ API** or **Google Identity Services**
+4. Go to **Credentials** → **Create Credentials** → **OAuth 2.0 Client ID**
+5. Configure the OAuth consent screen with your app details
+6. Create **Web Application** credentials with these settings:
+   - **Authorized JavaScript origins**: `http://localhost:5173`
+   - **Authorized redirect URIs**: `http://localhost:5173` (React OAuth handles this)
+
+### 2. Configure Environment Variables
+
+Add your Google Client ID to the frontend environment file:
+
+```bash
+# In apps/frontend/.env
+VITE_GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+```
+
+**Note**: Only the Client ID is needed for the frontend. The Client Secret is not used for security reasons
+(it would be exposed in the browser).
+
+### 3. Test Google Sign-In
+
+1. Restart the frontend: `docker-compose restart frontend`
+2. Visit `http://localhost:5173`
+3. Click "Continue with Google" on the login or register page
+4. Complete the OAuth flow
+
 ## Services Overview
 
 | Service          | URL                                | Description                    |

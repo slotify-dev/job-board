@@ -7,6 +7,7 @@ import type { LoginFormData } from '../types/auth.types';
 import { useAppDispatch, useAppSelector } from '../../../shared/store/store';
 import { loginAsync, clearError } from '../store/authSlice';
 import { useEffect } from 'react';
+import { GoogleSignInButton } from './GoogleSignInButtonNew';
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -121,6 +122,27 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
           )}
         </button>
       </form>
+
+      <div className="mt-6">
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-primary-200" />
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-primary-500">
+              Or continue with
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <GoogleSignInButton
+            role="job_seeker"
+            onSuccess={onSuccess}
+            className="w-full"
+          />
+        </div>
+      </div>
 
       <div className="mt-6 text-center">
         <p className="text-sm text-primary-600">

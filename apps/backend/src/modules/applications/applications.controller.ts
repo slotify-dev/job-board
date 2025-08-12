@@ -68,6 +68,7 @@ export class ApplicationsController {
           status: application.status,
           createdAt: application.createdAt,
           jobTitle: job.title || 'Unknown Job',
+          jobUuid: job.uuid,
           companyName: job.companyName || 'Unknown Company',
         },
       });
@@ -106,6 +107,7 @@ export class ApplicationsController {
           status: app.status,
           createdAt: app.createdAt,
           jobTitle: app.jobTitle || 'Unknown Job',
+          jobUuid: app.jobUuid || '',
           companyName: app.companyName || 'Unknown Company',
         })),
       });
